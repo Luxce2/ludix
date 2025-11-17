@@ -1,5 +1,12 @@
 # Ludix – Open Infrastructure for Game Distribution (Work in Progress)
 
+> 🇪🇸 **Ludix nació en español.**  
+> Este proyecto se concibió originalmente en idioma español y con una comunidad hispanohablante en mente.  
+> La documentación completa, detallada y extendida está disponible aquí:  
+> 👉 **[README.es.md (versión completa)](README.es.md)**  
+>
+> 🇺🇸 A shorter English version is available below.
+
 > **Status:** Phase 0 – Architecture, design, and documentation.  
 > No production-ready code exists yet. The goal of this early phase is to build  
 > a solid conceptual and technical foundation before writing a single line of code.
