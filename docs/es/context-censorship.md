@@ -151,6 +151,70 @@ Lo que ninguno de estos casos tuvo:
 
 ---
 
+## La distinción que Ludix hace — y que las plataformas no pudieron hacer
+
+Es importante ser honesto sobre algo incómodo:
+
+**No todo el contenido eliminado en los casos documentados era inocente.**
+
+En el caso de Pornhub, había contenido genuinamente ilegal — abuso sexual,  material no consensual — mezclado con el trabajo legal de miles de creadoras.  
+El problema no fue que se eliminara el contenido ilegal.  
+El problema fue el mecanismo: un procesador de pagos actuando como juez,  
+sin distinguir entre lo ilegal y lo legal, eliminando todo de golpe,  
+sin proceso, sin transparencia, sin posibilidad de apelación.
+
+Eso mismo pasó en itch.io: junto a contenido genuinamente problemático,  
+desaparecieron juegos premiados, obras de arte, novelas, y proyectos  
+de creadores LGBTQ+ que no habían hecho nada malo.
+
+Ludix no ignora esa realidad. La enfrenta con una distinción clara:
+
+---
+
+### Tres categorías. Tres respuestas distintas.
+
+**Categoría 1 — Ilegal universalmente reconocido**  
+CSAM, terrorismo, fraude, material de abuso sexual infantil.  
+Fuera de Ludix. Sin proceso. Sin discusión.  
+Hay consenso global y leyes claras en prácticamente todos los países.
+
+**Categoría 2 — Ilegal en una jurisdicción específica**  
+Si un gobierno emite una notificación legal legítima — con proceso  
+democrático, transparente, y con debido proceso — Ludix acata.  
+Pero *solo para esa jurisdicción*.  
+Un juego ilegal en Arabia Saudita no desaparece para un jugador en Alemania.  
+Un juego ilegal en un estado de EE.UU. no desaparece para toda América Latina.  
+La ley tiene alcance territorial. Ludix también.
+
+**Categoría 3 — Legal, pero incómodo para privados**  
+Aquí es donde está el problema real de todos los casos documentados.  
+Contenido legal en la mayoría de jurisdicciones, eliminado no por  
+una ley ni por un juez, sino porque una empresa privada decidió  
+que no encajaba con su política interna de riesgo.
+
+Para esta categoría, Ludix tiene una respuesta simple:  
+**No.**
+
+---
+
+### La regla de oro de Ludix sobre contenido
+
+> Si un gobierno, con un proceso legal legítimo, democrático y transparente,  
+> notifica que cierto contenido viola las leyes de su jurisdicción —  
+> ese contenido se retira para esa jurisdicción.  
+>  
+> Si una empresa privada, sin mandato democrático ni orden judicial,  
+> presiona para eliminar contenido legal — esa presión no tiene autoridad aquí.
+
+Ludix acepta leyes.  
+Ludix no acepta que Visa reemplace a un juez.  
+Ludix no acepta que Mastercard reemplace a un parlamento.  
+Ludix no acepta que una campaña de lobby reemplace a un proceso democrático.
+
+Esa distinción no es negociable. Es el núcleo de por qué este proyecto existe.
+
+---
+
 ## El problema de fondo: la concentración del poder de pago
 
 En Europa, Visa y Mastercard controlan conjuntamente más del **97% del mercado de pagos con tarjeta**.  

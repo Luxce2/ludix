@@ -22,7 +22,7 @@ The result was always the same:
 
 **That is financial censorship.** It doesn't matter what it's called in corporate press releases.
 
-Ludix exist so this cannot happen again. At least, not so easily.
+Ludix exists so this cannot happen again. At least, not so easily.
 
 ---
 
@@ -86,15 +86,28 @@ The platform does not decide for you. It gives you the information so that you d
 
 ### The law of each country, not the risk policy of a bank
 
-There is content that is illegal. That is what the judicial systems of each country are for.  
-Ludix respects that and does not host illegal content.
+Ludix recognizes three categories of content. They are distinct and must be treated differently.
 
-But there is a huge difference between:
+**Category 1 — Universally illegal**  
+CSAM, terrorism, fraud. No place in Ludix. No discussion.  
+There is global consensus and clear laws in virtually every country.
 
-- "This game is illegal in your jurisdiction" — a legitimate decision.
-- "This game does not fit our internal reputational risk standards" — private censorship.
+**Category 2 — Illegal in a specific jurisdiction**  
+If a government issues a legitimate legal notification — with a democratic,  
+transparent process and due process — Ludix complies. But *only for that jurisdiction*.  
+A game illegal in one country does not disappear for the rest of the world.  
+The law has territorial reach. So does Ludix.
 
-Ludix accepts the first. It rejects the second.
+**Category 3 — Legal, but uncomfortable for private companies**  
+This is where the real problem lies in every documented case.  
+Legal content in most jurisdictions, removed not by a law or a judge,  
+but because a private company decided it didn't fit their internal risk policy.
+
+For this category, Ludix has a simple answer: **No.**
+
+The distinction is clear:  
+**Legitimate law with democratic process = Ludix complies.**  
+**Private company with economic power acting as judge = Ludix refuses.**
 
 ### The community as guardian
 
@@ -189,7 +202,7 @@ Ludix tells them: **gateways are modular and governance is local. Build what you
 
 ## 8. The wager
 
-Ludix is a bet.
+Ludix is a wager.
 
 We don't guarantee that it will work. We don't guarantee that adoption will come. We don't guarantee that we will solve all the problems of the game distribution ecosystem.
 
@@ -201,4 +214,6 @@ If this resonates with you — as a player, as a dev, as a contributor, or simpl
 
 ---
 
-*Living document — last revision: Phase 0.* *For technical and architectural context, see `docs/en/architecture.md`.* *For condensed principles, see `MANIFESTO.md`.*
+*Living document — last revision: Phase 0.*  
+*For technical and architectural context, see `docs/en/architecture.md`.*  
+*For condensed principles, see `MANIFESTO.md`.*

@@ -85,6 +85,25 @@ Eso no es una promesa. Es la arquitectura.
 
 ---
 
+## La línea que no cruzaremos — y la que sí respetamos
+
+Hay contenido que es ilegal. Para eso existen los tribunales.  
+Si un gobierno, con un proceso legal legítimo y transparente, nos notifica que cierto contenido viola las leyes de su país — lo retiramos. Sin drama.  
+Eso es el estado de derecho. Lo respetamos.
+
+Pero hay una diferencia enorme entre eso y lo que ha pasado:
+
+- Una empresa de tarjetas manda un correo.  
+- Una plataforma elimina miles de juegos en 24 horas.  
+- Ningún juez. Ninguna ley. Ningún proceso.
+
+Eso no es justicia. Es poder económico actuando como tribunal privado.
+
+Ludix acepta leyes.  
+Ludix no acepta que Visa reemplace a un juez.
+
+---
+
 ## Para quién es Ludix
 
 Para el desarrollador que perdió su fuente de ingresos porque su juego era NSFW y legal.  

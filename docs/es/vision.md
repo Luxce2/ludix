@@ -86,15 +86,28 @@ La plataforma no decide por ti. Te da la información para que decidas tú.
 
 ### La ley de cada país, no la política de riesgo de un banco
 
-Hay contenido que es ilegal. Para eso existen los sistemas judiciales de cada país.  
-Ludix respeta eso y no aloja contenido ilegal.
+Ludix reconoce tres categorías de contenido. Son distintas y deben tratarse distinto.
 
-Pero hay una diferencia enorme entre:
+**Categoría 1 — Ilegal universalmente**  
+CSAM, terrorismo, fraude. No tiene lugar en Ludix. Sin discusión.  
+Hay consenso global, hay leyes claras, y Ludix las respeta.
 
-- "Este juego es ilegal en tu jurisdicción" — decisión legítima.
-- "Este juego no encaja con nuestros estándares internos de riesgo reputacional" — censura privada.
+**Categoría 2 — Ilegal en una jurisdicción específica**  
+Si un gobierno emite una notificación legal legítima, con proceso  
+democrático y transparente, Ludix acata — pero *solo para esa jurisdicción*.  
+Un juego ilegal en un país no desaparece para el resto del mundo.  
+La ley tiene alcance territorial. Ludix también.
 
-Ludix acepta el primero. Rechaza el segundo.
+**Categoría 3 — Legal, pero incómodo para privados**  
+Aquí es donde Ludix planta la bandera.  
+Ningún correo de Visa. Ninguna campaña de lobby. Ninguna "política  
+interna de riesgo reputacional" de Stripe tiene autoridad sobre esto.  
+Si es legal en la jurisdicción del jugador y del desarrollador,  
+ningún privado sin mandato democrático debería poder hacerlo desaparecer.
+
+La distinción es simple:  
+**Ley legítima con proceso democrático = Ludix respeta.**  
+**Privado con poder económico actuando como juez = Ludix rechaza.**
 
 ### La comunidad como guardián
 

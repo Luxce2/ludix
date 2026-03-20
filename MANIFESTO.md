@@ -1,9 +1,10 @@
 # Ludix Manifesto
 
-> *"Total freedom has its risks. The responsibility is also yours."*
-
 > 🇪🇸 Este manifiesto fue escrito originalmente en español.
 > La versión original está en [MANIFESTO.es.md](MANIFESTO.es.md)
+
+> *"Total freedom has its risks. The responsibility is also yours."*
+
 ---
 
 ## Why this exists
@@ -82,6 +83,26 @@ That's not a promise. It's the architecture.
 
 ---
 
+## The line we will not cross — and the one we respect
+
+There is content that is illegal. That is what courts are for.  
+If a government, through a legitimate and transparent legal process, notifies us  
+that certain content violates the laws of their country — we remove it. No drama.  
+That is the rule of law. We respect it.
+
+But there is an enormous difference between that and what has actually happened:
+
+- A credit card company sends an email.  
+- A platform removes thousands of games within 24 hours.  
+- No judge. No law. No process.
+
+That is not justice. That is economic power acting as a private tribunal.
+
+Ludix accepts laws.  
+Ludix does not accept Visa replacing a judge.
+
+---
+
 ## Who Ludix is for
 
 For the developer who lost their source of income because their game was NSFW and legal.  
@@ -121,11 +142,12 @@ It is the most important guarantee we can give.
 This project was born out of indignation.  
 From seeing how something that should be impossible — a private company deleting thousands of games with an email — became normalized without almost anyone protesting.
 
-Ludix is the act of building something better instead of just complaining.
+Ludix is the technical answer to that problem.
 
 We don't promise to win.  
 We promise to try with honesty.
 
 ---
 
-*Ludix — Open infrastructure for game distribution.* *Phase 0 — Under construction. Join us.*
+*Ludix — Open infrastructure for game distribution.*  
+*Phase 0 — Under construction. Join us.*
