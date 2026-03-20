@@ -13,48 +13,61 @@ El **TrustChain** es un sistema de verificación por capas diseñado para proteg
 ## 2. Principios de Diseño
 * **Transparencia Total**: Cada certificación y cambio de estado debe ser auditable.
 * **Soberanía del Desarrollador**: El desarrollador es dueño de sus claves y de su identidad técnica.
-* **Resiliencia a Forks**: Si alguien crea un fork de Ludix, las firmas criptográficas de los desarrolladores originales siguen siendo válidas y verificables.
+* **Resiliencia a Forks**: Si alguien crea un fork de Ludix, las firmas originales siguen siendo válidas.
 
 ---
 
 ## 3. Las 6 Capas de Confianza
 
-### Capa 1: Identidad Criptográfica (El Ancla)
+### ## Capa 1: Identidad Criptográfica (El Ancla)
 Cada desarrollador debe generar un par de claves (pública/privada) al registrarse.
-* **Tecnología Propuesta**: Algoritmo **Ed25519** (rápido, seguro y con firmas pequeñas).
-* **Uso**: La clave privada firma los metadatos del juego y los hashes de los archivos.
-* **Validación**: El Core API de Ludix y el Launcher verifican que la firma coincida con la clave pública registrada.
+* **Tecnología**: Algoritmo **Ed25519**.
+* **Uso**: La clave privada firma los metadatos y hashes de los archivos.
+* **Validación**: El Core API y el Launcher verifican la firma contra la clave pública registrada.
 
-### Capa 2: Verificación de Dominio (Vinculación Web)
+### ## Capa 2: Verificación de Dominio
 Vincular una cuenta de Ludix con un dominio web oficial.
-* **Método A (HTTP)**: Subir un archivo JSON en `https://dominio.com/.well-known/ludix-verify.json`.
-* **Método B (DNS)**: Añadir un registro TXT con un token único generado por Ludix.
-* **Resultado**: Esto evita que un tercero suplante a una marca conocida.
+* **Métodos**: Carga de archivo JSON en `/.well-known/ludix-verify.json` o registro **DNS TXT**.
+* **Resultado**: Evita la suplantación de marcas conocidas.
 
-### Capa 3: Vínculos Sociales y de Plataforma
-Integración opcional con cuentas externas para heredar reputación:
-* **GitHub/GitLab**: Verificación de código fuente.
-* **Steamworks**: Para desarrolladores que ya tienen presencia en Steam.
-* **Twitter/X e Itch.io**: Validación de comunidad.
+### ## Capa 3: Vínculos Sociales y de Plataforma
+Integración opcional con GitHub, Twitter/X, Itch.io o Steamworks para heredar reputación.
 
-### Capa 4: Integridad de los Builds
-Asegurar que el archivo que el jugador descarga es exactamente el que el desarrollador subió.
-* **Hash Obligatorio**: Cada build debe registrar su **SHA-256**.
-* **Firma de Build**: (Opcional) El archivo puede estar firmado digitalmente con la clave privada del estudio.
-* **Alerta del Launcher**: Si el hash no coincide, el Launcher bloquea la ejecución.
+### ## Capa 4: Integridad de los Builds
+* **Hash Obligatorio**: Registro de **SHA-256** para cada build.
+* **Firma de Build**: Firma digital opcional con la clave privada del estudio.
+* **Seguridad**: El Launcher bloquea la ejecución si el hash no coincide.
 
-### Capa 5: Sistema de Reputación Dinámica
-Un algoritmo que calcula un "Nivel de Confianza" basado en señales:
-* **Señales Positivas**: Antigüedad de la cuenta, volumen de ventas exitosas, dominio verificado.
-* **Señales Negativas**: Reportes de malware, keys de Steam inválidas, cambios frecuentes de wallets.
+### ## Capa 5: Sistema de Reputación Dinámica
+Algoritmo que pondera antigüedad, ventas exitosas y reportes de la comunidad.
 
-### Capa 6: Requisitos de Alta Confianza (Venta de Claves)
-Para vender Steam Keys u otros productos externos, se requiere el máximo nivel de verificación:
-* **Validación Humana/Comunitaria**: Solo devs con reputación consolidada pueden habilitar esta función para evitar mercados grises.
+### ## Capa 6: Requisitos de Alta Confianza
+Nivel superior exigido para la venta de Steam Keys y claves externas, evitando mercados grises.
 
 ---
 
-## 4. Flujo de Implementación Técnica (MVP)
-1.  **Registro**: El backend genera un *challenge* (un string aleatorio).
-2.  **Firma**: El desarrollador firma el *challenge* con su clave privada y lo envía de vuelta.
-3.  **Verificación**: El backend guarda la clave pública y marca la cuenta como **"Identidad Técnica Verificada"**.
+## 4. Manejo de Crisis y Revocación (Blindaje de Seguridad)
+
+Para mitigar el riesgo de robo o pérdida de claves (Capa 1), se implementan dos mecanismos:
+
+### ## Clave de Revocación (Cold Storage)
+Al registrarse, el desarrollador puede registrar una **clave de revocación** secundaria. Esta clave debe guardarse fuera de línea (papel o hardware wallet) y solo sirve para invalidar la clave activa en caso de compromiso.
+
+### ## Período de Cuarentena
+Cualquier cambio en la clave pública principal o en la billetera de cobro disparará un estado de "Cuarentena" de 48-72 horas, alertando a los compradores y pausando las ventas de alta confianza hasta que se confirme la legitimidad.
+
+---
+
+## 5. Transparencia y Auditoría de Forks
+
+Para asegurar que un fork de Ludix sea "limpio" y no haya sido manipulado por su administrador:
+
+### ## Registro Público de Verificaciones (Auditoría)
+El backend mantendrá un log público e inmutable de cada evento de verificación (ej: "Dominio X verificado por el Oráculo Y en fecha Z"). Los launchers podrán consultar múltiples fuentes para confirmar que un desarrollador marcado como "Verificado" en un fork, realmente superó las pruebas técnicas.
+
+---
+
+## 6. Flujo de Implementación Técnica (MVP)
+1. **Registro**: Generación de *challenge* aleatorio por el backend.
+2. **Firma**: El dev firma el *challenge* y lo devuelve.
+3. **Verificación**: El backend guarda la clave pública y marca la identidad como verididcada.
