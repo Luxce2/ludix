@@ -1,4 +1,4 @@
-#🔗 Ludix TrustChain: Especificación de Confianza
+# 🔗 Ludix TrustChain: Especificación de Confianza
     Estado: Fase 0 - Diseño Conceptual.
     Propósito: Garantizar la autenticidad de los desarrolladores y la integridad de los juegos sin intermediarios centralizados.
 
