@@ -1,135 +1,131 @@
-# Manifiesto Ludix
+# Ludix Manifesto
 
-> *"La libertad total tiene sus riesgos. La responsabilidad también es tuya."*
+> *"Total freedom has its risks. The responsibility is also yours."*
+
+> 🇪🇸 Este manifiesto fue escrito originalmente en español.
+> La versión original está en [MANIFESTO.es.md](MANIFESTO.es.md)
+---
+
+## Why this exists
+
+One day, thousands of players opened their libraries and found games that were no longer there.  
+Not because they were illegal.  
+Not because a judge ordered it.  
+Not because the community asked for it.
+
+They disappeared because a credit card company didn't like them.
+
+That happened. It is documented. And it can happen again tomorrow.
+
+Ludix exists because that should not be possible.
 
 ---
 
-## Por qué existe esto
-
-Un día, miles de jugadores abrieron su biblioteca y encontraron juegos que ya no estaban.  
-No porque fueran ilegales.  
-No porque un juez lo ordenara.  
-No porque la comunidad lo pidiera.
-
-Desaparecieron porque a una empresa de tarjetas de crédito no le gustaron.
-
-Eso pasó. Está documentado. Y puede volver a pasar mañana.
-
-Ludix existe porque eso no debería ser posible.
-
----
-
-## El poder que les dimos sin darnos cuenta
+## The power we gave them without realizing
 
 Visa, Mastercard, Stripe, PayPal.  
-Ninguna de esas empresas es un gobierno.  
-Ninguna fue elegida democráticamente.  
-Ninguna tiene autoridad legal para decidir qué contenido puede existir en el mundo.
+None of these companies is a government.  
+None was democratically elected.  
+None has the legal authority to decide what content can exist in the world.
 
-Pero tienen algo más poderoso que una ley:  
-**controlan el flujo del dinero.**
+But they have something more powerful than a law:  
+**They control the flow of money.**
 
-Y cuando controlas el dinero, controlas qué proyectos sobreviven y cuáles no.
+And when you control the money, you control which projects survive and which do not.
 
-Lo hicieron con plataformas de adultos.  
-Lo hicieron con juegos.  
-Lo harán de nuevo, con lo que sea que les incomode después.
+They did it with adult platforms.  
+They did it with games.  
+They will do it again, with whatever makes them uncomfortable next.
 
-No fue un accidente. Fue una demostración de poder.  
-Y nosotros, sin darnos cuenta, se lo permitimos al centralizar todos los pagos en sus manos.
-
----
-
-## Ludix no es la solución perfecta
-
-Seamos honestos desde el principio:
-
-**Ludix no te va a proteger de todo.**
-
-Si instalas Linux eres dueño de tu sistema — pero también puedes romperlo.  
-Nadie viene a salvarte si ejecutas el comando equivocado.  
-Esa es exactamente la misma libertad que Ludix ofrece.
-
-Aquí vas a encontrar juegos de desarrolladores verificados con años de reputación.  
-Y también vas a encontrar devs nuevos, sin historial, que acaban de publicar su primer juego.  
-El sistema te lo va a decir con claridad.  
-La decisión es tuya.
-
-No buscamos no equivocarnos.  
-Buscamos **transparencia radical**.
+It wasn't an accident. It was a demonstration of power.  
+And we, without realizing it, allowed it by centralizing all payments in their hands.
 
 ---
 
-## Qué creemos
+## Ludix is not the perfect solution
 
-**La libertad y la responsabilidad son inseparables.**  
-No puedes tener una sin la otra. Si quieres que nadie decida por ti, tienes que decidir tú.
+Let's be honest from the start:
 
-**Si algo debe ser ilegal, para eso están las leyes.**  
-Cada país tiene su sistema jurídico. Eso existe para algo.  
-Un banco no debería tener ese poder.  
-Y un banco no debería reemplazar a un juez.
+**Ludix is not going to protect you from everything.**
 
-**La censura financiera es censura.**  
-No importa si viene disfrazada de "política de riesgo" o "estándares de la comunidad".  
-Cuando cortan el dinero, cortan la voz. Es lo mismo.
+If you install Linux, you own your system — but you can also break it.  
+No one is coming to save you if you run the wrong command.  
+That is exactly the same freedom that Ludix offers.
 
-**La comunidad es el guardián, no la plataforma.**  
-Ludix no es una empresa con un departamento de moderación corporativa.  
-Es infraestructura. El resto lo construye la comunidad, con reglas transparentes y auditables.
+Here you will find games from verified developers with years of reputation.  
+And you will also find new devs, with no history, who just published their first game.  
+The system will tell you clearly.  
+The decision is yours.
 
-**Open source real, no de marketing.**  
-Puedes ver el código. Puedes auditarlo. Puedes forkearlo.  
-Puedes levantar tu propia instancia con tus propias reglas.  
-Eso no es una promesa. Es la arquitectura.
+We don't seek to be infallible.  
+We seek **radical transparency**.
 
 ---
 
-## Para quién es Ludix
+## What we believe
 
-Para el desarrollador que perdió su fuente de ingresos porque su juego era NSFW y legal.  
-Para el jugador que perdió juegos de su biblioteca sin previo aviso ni explicación.  
-Para la comunidad que quiere construir un ecosistema de juegos que ningún banco pueda apagar.  
-Para el dev indie en cualquier país del mundo que quiere cobrar su trabajo sin pedir permiso.
+**Freedom and responsibility are inseparable.** You cannot have one without the other. If you want no one to decide for you, you have to decide for yourself.
 
-No es para todos. Y está bien.
+**If something should be illegal, that's what laws are for.** Each country has its own legal system. That exists for a reason.  
+A bank should not have that power.  
+And a bank should not replace a judge.
 
----
+**Financial censorship is censorship.** It doesn't matter if it comes disguised as "risk policy" or "community standards".  
+When they cut off the money, they cut off the voice. It's the same thing.
 
-## Lo que Ludix no va a hacer nunca
+**The community is the guardian, not the platform.** Ludix is not a company with a corporate moderation department.  
+It is infrastructure. The rest is built by the community, with transparent and auditable rules.
 
-- Cobrar comisión por tus ventas.  
-- Tener tu dinero. Ni un segundo.  
-- Decirte qué juego puedes comprar si es legal en tu país.  
-- Venderte un token para poder usar la plataforma.  
-- Cambiar las reglas a mitad del camino sin que la comunidad lo sepa.  
-- Pretender que es perfecto.
+**Real open source, not marketing.** You can see the code. You can audit it. You can fork it.  
+You can run your own instance with your own rules.  
+That's not a promise. It's the architecture.
 
 ---
 
-## El poder de los forks
+## Who Ludix is for
 
-Si mañana Ludix se desvía de estos principios, la comunidad puede forkearlo.  
-Las firmas criptográficas de los desarrolladores siguen siendo válidas.  
-Los builds verificados siguen siendo verificados.  
-La reputación construida no desaparece.
+For the developer who lost their source of income because their game was NSFW and legal.  
+For the player who lost games from their library without prior notice or explanation.  
+For the community that wants to build a game ecosystem that no bank can shut down.  
+For the indie dev in any country in the world who wants to get paid for their work without asking for permission.
 
-Eso no es una característica técnica.  
-Es la garantía más importante que podemos dar.
-
----
-
-## Una última cosa
-
-Este proyecto nació de la indignación.  
-De ver cómo algo que debería ser imposible — que una empresa privada borre miles de juegos con un correo — se normalizó sin que casi nadie protestara.
-
-Ludix es la protesta técnica a ese problema.
-
-No prometemos ganar.  
-Prometemos intentarlo con honestidad.
+It's not for everyone. And that's okay.
 
 ---
 
-*Ludix — Infraestructura abierta para la distribución de videojuegos.*  
-*Fase 0 — En construcción. Únete.*
+## What Ludix will never do
+
+- Charge a commission on your sales.  
+- Hold your money. Not even for a second.  
+- Tell you which game you can buy if it's legal in your country.  
+- Sell you a token to be able to use the platform.  
+- Change the rules halfway without the community knowing.  
+- Pretend it's perfect.
+
+---
+
+## The power of forks
+
+If tomorrow Ludix deviates from these principles, the community can fork it.  
+The cryptographic signatures of the developers remain valid.  
+Verified builds remain verified.  
+The built reputation does not disappear.
+
+This is not a technical feature.  
+It is the most important guarantee we can give.
+
+---
+
+## One last thing
+
+This project was born out of indignation.  
+From seeing how something that should be impossible — a private company deleting thousands of games with an email — became normalized without almost anyone protesting.
+
+Ludix is the technical protest to that problem.
+
+We don't promise to win.  
+We promise to try with honesty.
+
+---
+
+*Ludix — Open infrastructure for game distribution.* *Phase 0 — Under construction. Join us.*
