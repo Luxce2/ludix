@@ -21,7 +21,7 @@ Ludix exists because that should not be possible.
 
 ---
 
-## The power we gave them without realizing
+## The power we gave them without realizing it
 
 Visa, Mastercard, Stripe, PayPal.  
 None of these companies is a government.  
@@ -99,7 +99,7 @@ It's not for everyone. And that's okay.
 - Hold your money. Not even for a second.  
 - Tell you which game you can buy if it's legal in your country.  
 - Sell you a token to be able to use the platform.  
-- Change the rules halfway without the community knowing.  
+- Change the rules midway without the community knowing.  
 - Pretend it's perfect.
 
 ---
@@ -121,7 +121,7 @@ It is the most important guarantee we can give.
 This project was born out of indignation.  
 From seeing how something that should be impossible — a private company deleting thousands of games with an email — became normalized without almost anyone protesting.
 
-Ludix is the technical protest to that problem.
+Ludix is the act of building something better instead of just complaining.
 
 We don't promise to win.  
 We promise to try with honesty.
