@@ -286,6 +286,19 @@ Campos propuestos para el MVP:
 
 Para Fase 1 probablemente exista una única oferta activa por juego, pero el esquema no debe confundir esa simplificación con una limitación eterna.
 
+### 6.2 Regla de portabilidad del modelo
+
+Los valores concretos de Polygon PoS y USDC pertenecen a la configuración y a los datos del rail de Fase 1. **No deben convertirse en supuestos estructurales del modelo de dominio.**
+
+En particular:
+
+- las tablas centrales conservan `chain_id`, `token_contract`, cantidades y referencias de evidencia como datos explícitos;
+- `entitlements` no requiere conocer red ni token para representar el derecho adquirido;
+- futuros rails pueden producir evidencia con una identidad diferente a `chain_id + tx_hash + log_index`, siempre que RFC-0001 conserve la separación entre evidencia, evaluación y Entitlement;
+- una migración futura para añadir otra familia de red no debería exigir reinterpretar compras históricas como si hubieran ocurrido en el nuevo rail.
+
+Esta es la traducción al modelo de datos de la estrategia aprobada: **A para implementar, D para diseñar**.
+
 ---
 
 ## 7. Payment Intents

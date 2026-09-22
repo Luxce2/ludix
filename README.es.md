@@ -604,7 +604,8 @@ Este README y los documentos en `docs/` y `specs/` son parte de esa fase.
 - RFC-0002: modelo de datos derivado del flujo.
 - TrustChain: identidad pública verificable + evidencia sensible privada.
 - Definición de arquitectura y responsabilidades Core / Watcher / Launcher.
-- Red y activo del MVP fijados: **Polygon PoS + USDC nativo**.
+- Red y activo del MVP **aprobados**: **Polygon PoS + USDC nativo de Circle**.
+- Estrategia arquitectónica aprobada: **A para implementar, D para diseñar** — un solo rail en Fase 1, Core agnóstico y dependencias reemplazables.
 - Cierre pendiente de política de finalidad y duración de intents.
 - RFC-0003 / RFC-0004 antes de iniciar implementación.
 - Licencia definitiva antes del primer código funcional.
@@ -746,7 +747,9 @@ Antes de publicar el primer código funcional del proyecto, se fijará la licenc
 
 El MVP de Ludix parte de **pagos directos on-chain** y comenzará específicamente con **Polygon PoS + USDC nativo de Circle** para hacer bien el flujo completo antes de multiplicar integraciones.
 
-Esa dependencia inicial no es el objetivo final. La arquitectura está preparada para incorporar progresivamente otros activos, redes y Gateways, reduciendo la dependencia de un único emisor, proveedor o intermediario privado.
+Esa dependencia inicial no es el objetivo final. La decisión aprobada sigue la regla **“A para implementar, D para diseñar”**: una sola ruta en el MVP para llegar antes a una compra real y comprobable, mientras el Core permanece preparado para incorporar progresivamente otros activos, redes y Gateways sin redefinir qué significa adquirir un juego.
+
+Polygon y Circle son proveedores iniciales reemplazables; no forman parte de la identidad del protocolo Ludix.
 
 Los Gateways locales son opcionales y permiten adaptar una instancia a sistemas como Pix, Mercado Pago o UPI sin convertirlos en requisito del core. La filosofía sigue siendo minimizar puntos privados capaces de cortar unilateralmente el acceso económico a contenido legal.
 

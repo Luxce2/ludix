@@ -1,6 +1,6 @@
 # RFC-0001: Flujo de Compra y Pago No Custodial
 
-> **Estado:** Fase 0 — Aprobado conceptualmente; parámetros concretos del MVP pendientes.
+> **Estado:** Fase 0 — Flujo aprobado conceptualmente; Polygon PoS + USDC nativo aprobados para Fase 1; finalidad y duración del intent pendientes.
 > **Ámbito:** MVP on-chain de Ludix.
 > **Objetivo:** definir cómo una transferencia directa entre jugador y desarrollador se convierte, de forma verificable e idempotente, en un derecho de acceso a un juego sin que Ludix custodie fondos ni pueda gastarlos.
 
@@ -194,6 +194,31 @@ La selección Polygon PoS + USDC nativo es una **decisión de alcance para Fase 
 Esta restricción es deliberadamente transitoria. La dirección futura de Ludix es ampliar de forma gradual los activos y redes compatibles, siempre que puedan integrarse sin introducir custodia ni permisos de gasto por parte de Ludix.
 
 El objetivo de esa expansión no es acumular blockchains por cantidad, sino **reducir dependencias concentradas y ofrecer caminos de pago cada vez menos expuestos a la decisión unilateral de un único proveedor, emisor o intermediario privado**.
+
+### 6.1 Estrategia aprobada: A para implementar, D para diseñar
+
+Ludix adopta explícitamente una estrategia combinada:
+
+> **Implementar una sola ruta de pago de forma simple y robusta, pero diseñar el Core para que ninguna red, activo o proveedor concreto forme parte de la definición permanente del protocolo.**
+
+Esto significa que Fase 1 puede ser deliberadamente específica en sus adaptadores y herramientas sin volver específicos al dominio central ni al derecho adquirido.
+
+La primera implementación puede conocer Polygon PoS y USDC en el Chain Watcher, en configuración y en la experiencia de wallet. El Core, sin embargo, debe razonar sobre **Payment Intents, evidencia, pagos y Entitlements**, no sobre la idea de que “Polygon” o “USDC” sean sinónimos de compra.
+
+### 6.2 Salvaguardas arquitectónicas obligatorias
+
+La aprobación de Polygon PoS + USDC nativo está condicionada a estas reglas:
+
+1. **Solo USDC nativo satisface el rail del MVP.** USDC.e, tokens puenteados o contratos distintos no se aceptan por parecido de nombre o símbolo.
+2. **Un activo se identifica siempre por red + contrato**, nunca por ticker aislado.
+3. **La confirmación no depende de una API de Circle.** El Chain Watcher obtiene la evidencia desde la blockchain mediante infraestructura RPC reemplazable.
+4. **El Core no contiene lógica de negocio equivalente a “Polygon = pago válido”.** Polygon pertenece al adaptador/rail y a su política, no al significado de una compra.
+5. **El Entitlement es independiente del rail.** Una vez concedido, no depende de Polygon, USDC ni de la wallet pagadora para existir en la biblioteca.
+6. **Polygon y USDC se documentan como dependencias iniciales reemplazables**, no como requisitos eternos del protocolo Ludix.
+7. **La expansión futura debe incluir diversidad real de rails**, no únicamente múltiples redes que compartan exactamente los mismos puntos de control. Una segunda familia tecnológica, como Solana u otra equivalente, es una dirección válida a estudiar.
+8. **Ludix debe estudiar en fases futuras al menos una ruta que no dependa de un emisor central de stablecoin**, aceptando que ello puede introducir volatilidad, pricing u otras complejidades que no pertenecen a Fase 1.
+
+Estas reglas permiten empezar pragmáticamente sin confundir simplicidad inicial con dependencia estructural.
 
 ---
 
