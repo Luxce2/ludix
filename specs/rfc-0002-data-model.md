@@ -327,10 +327,14 @@ Campos mínimos propuestos:
 - `created_at`: TIMESTAMPTZ.
 - `expires_at`: TIMESTAMPTZ; para Fase 1 se crea normalmente como `created_at + 60 minutos`.
 - `confirmed_at`: TIMESTAMPTZ nullable.
+- `auto_reconciliation_until`: TIMESTAMPTZ; para Fase 1 representa el límite operativo de 72 horas para seguimiento automático, sin invalidar evidencia histórica.
+- `resolution_status`: estado operacional nullable o derivable (`ACTIVE`, `UNRESOLVED`, `RECOVERY_REQUIRED`, `RESOLVED`), separado del significado económico del pago.
 
 Los campos económicos congelados no se actualizan después de crear el intent.
 
-Para Fase 1, la ventana de pago aprobada es de **60 minutos**. La duración posterior durante la cual el sistema intenta reconciliar automáticamente una transferencia ya realizada es una política diferente y todavía pendiente; no debe confundirse con `expires_at`.
+Para Fase 1, la ventana de pago aprobada es de **60 minutos** y la ventana automática de resolución/reconciliación es de **72 horas**. No deben confundirse: `expires_at` determina hasta cuándo una nueva transferencia pertenece al flujo normal del intent; la reconciliación determina cuánto tiempo Ludix sigue intentando resolver automáticamente una transferencia potencialmente ya realizada.
+
+Superadas las 72 horas, el caso puede pasar a recuperación sin eliminar la evidencia ni volver inválida una transferencia que objetivamente fue incluida dentro de la ventana de 60 minutos. La recuperación histórica debe seguir siendo posible mientras exista evidencia correlacionable y se respeten las políticas de retención aplicables.
 
 ---
 
@@ -619,15 +623,14 @@ Esto deriva directamente de RFC-0001 y permite añadir otros métodos de adquisi
 ## 20. Decisiones pendientes antes de implementación
 
 1. representación final de `chain_id` en el esquema;
-2. duración/política de la ventana automática de reconciliación;
-3. política exacta de finalidad para Polygon PoS;
-4. reglas de ownership/uso compartido de wallets;
-5. formato del Wallet Proof;
-6. política final de firma de builds;
-7. formato de atestaciones TrustChain;
-8. política de retención de evidencia privada y auditoría;
-9. tratamiento exacto de revocaciones de Entitlements;
-10. comportamiento ante pagos tardíos/duplicados que requieran soporte manual.
+2. política exacta de finalidad para Polygon PoS;
+3. reglas de ownership/uso compartido de wallets;
+4. formato del Wallet Proof;
+5. política final de firma de builds;
+6. formato de atestaciones TrustChain;
+7. política de retención de evidencia privada y auditoría;
+8. tratamiento exacto de revocaciones de Entitlements;
+9. comportamiento ante pagos tardíos/duplicados que requieran soporte manual.
 
 Hasta cerrar estas decisiones y revisar este modelo contra RFC-0003/RFC-0004, el documento permanece en Fase 0.
 

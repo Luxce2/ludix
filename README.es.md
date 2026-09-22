@@ -606,7 +606,7 @@ Este README y los documentos en `docs/` y `specs/` son parte de esa fase.
 - Definición de arquitectura y responsabilidades Core / Watcher / Launcher.
 - Red y activo del MVP **aprobados**: **Polygon PoS + USDC nativo de Circle**.
 - Estrategia arquitectónica aprobada: **A para implementar, D para diseñar** — un solo rail en Fase 1, Core agnóstico y dependencias reemplazables.
-- Ventana de pago del Payment Intent **aprobada: 60 minutos**; ventana de resolución/reconciliación y política de finalidad aún pendientes.
+- Ventanas aprobadas: **60 minutos para realizar el pago + 72 horas de reconciliación automática**; una transferencia incluida a tiempo puede recuperarse históricamente después. Política exacta de finalidad aún pendiente.
 - RFC-0003 / RFC-0004 antes de iniciar implementación.
 - Licencia definitiva antes del primer código funcional.
 

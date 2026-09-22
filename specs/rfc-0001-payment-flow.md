@@ -1,6 +1,6 @@
 # RFC-0001: Flujo de Compra y Pago No Custodial
 
-> **Estado:** Fase 0 — Flujo aprobado conceptualmente; Polygon PoS + USDC nativo y ventana de pago de 60 minutos aprobados para Fase 1; finalidad y ventana de resolución pendientes.
+> **Estado:** Fase 0 — Flujo aprobado conceptualmente; Polygon PoS + USDC nativo, ventana de pago de 60 minutos y reconciliación automática de 72 horas aprobados para Fase 1; finalidad exacta pendiente.
 > **Ámbito:** MVP on-chain de Ludix.
 > **Objetivo:** definir cómo una transferencia directa entre jugador y desarrollador se convierte, de forma verificable e idempotente, en un derecho de acceso a un juego sin que Ludix custodie fondos ni pueda gastarlos.
 
@@ -466,7 +466,11 @@ La hora se elige como margen humano razonable para abrir o configurar la wallet,
 
 La ventana de 60 minutos responde únicamente a **cuándo debe ocurrir la transferencia** para pertenecer al flujo normal de ese intent. No define cuánto tiempo puede tardar Ludix en detectar, verificar o reconciliar una transferencia que ya ocurrió.
 
-La duración de la **ventana automática de resolución/reconciliación** se decidirá por separado. Un fallo del Watcher, RPC, Core o Launcher nunca debe convertir retroactivamente una transferencia incluida a tiempo en un pago fuera de plazo.
+Para Fase 1 se aprueba una **ventana automática de resolución/reconciliación de 72 horas**. Durante ese período, Ludix puede seguir reintentando consultas RPC, observación del Watcher, correlación y validación de finalidad para una compra potencialmente pagada.
+
+Las 72 horas no son una fecha de caducidad de la compra. Al finalizar esa ventana, el sistema puede dejar de realizar seguimiento automático intensivo y mover el caso a un estado operativo de recuperación, pero **no debe declarar inválida una transferencia únicamente porque Ludix tardó en verificarla**.
+
+Un fallo del Watcher, RPC, Core o Launcher nunca debe convertir retroactivamente una transferencia incluida a tiempo en un pago fuera de plazo.
 
 Se distinguen dos momentos:
 
@@ -477,9 +481,25 @@ Se distinguen dos momentos:
 
 Si la transferencia fue incluida en cadena dentro de la ventana válida del Payment Intent, puede terminar de confirmarse después de `expires_at`.
 
+La evidencia histórica de una transferencia válida **no caduca conceptualmente por superar las 72 horas de reconciliación automática**. Mientras Ludix conserve los datos necesarios para correlacionarla de forma inequívoca y la blockchain permita verificarla, una transferencia incluida dentro de los 60 minutos puede ser recuperada posteriormente y producir el Entitlement correspondiente.
+
+La ventana de 72 horas controla el esfuerzo automático de reconciliación; no redefine retrospectivamente la validez económica del pago.
+
 Si el intent expira sin evidencia de una transferencia incluida a tiempo, deja de aceptar pagos nuevos bajo esas condiciones.
 
 Una transferencia enviada después de la expiración no concede automáticamente el Entitlement aunque casualmente tenga el mismo monto y destino. Debe tratarse como un caso de recuperación/manual claramente registrado, no como una coincidencia silenciosa.
+
+### 15.4 Estados de resolución prolongada
+
+La implementación puede refinar los nombres, pero debe distinguir semánticamente al menos:
+
+```text
+CONFIRMING          -> existe evidencia y se espera finalidad o verificación adicional
+UNRESOLVED          -> Ludix todavía no puede concluir si la compra es válida
+RECOVERY_REQUIRED   -> terminó la reconciliación automática; puede requerir reintento posterior o acción del usuario/soporte
+```
+
+`UNRESOLVED` y `RECOVERY_REQUIRED` **no significan `FAILED`**. Expresan incapacidad operativa para concluir, no evidencia de que el jugador no pagó.
 
 ---
 
@@ -865,6 +885,8 @@ Casos excepcionales deben ser igualmente explícitos:
 - "El monto recibido es menor al requerido" cuando existe un underpayment.
 - "Esta transferencia no salió de la wallet vinculada a la compra" cuando el origen no coincide.
 - "La intención de compra expiró" cuando no hubo transferencia válida a tiempo.
+- "Seguimos intentando verificar tu pago" durante la ventana automática de reconciliación.
+- "No pudimos resolverlo automáticamente; puedes volver a comprobar este pago" cuando pase a recuperación sin evidencia concluyente.
 - "Esta transferencia ya fue utilizada" ante un intento de replay.
 
 La interfaz nunca debe insinuar que Ludix puede devolver automáticamente fondos que nunca custodió.
@@ -948,14 +970,13 @@ El flujo de pago no debe considerarse listo para implementación hasta que el di
 
 Este RFC fija el modelo conceptual. Los siguientes parámetros todavía deben cerrarse en RFCs posteriores o en una revisión final de Fase 0:
 
-1. duración de la ventana automática de resolución/reconciliación después de una transferencia;
-2. criterio exacto de confirmaciones/finalidad para Polygon PoS;
-3. formato canónico del desafío de firma de wallet;
-4. política operativa para pagos realizados después de la expiración;
-5. política de soporte para pagos duplicados o excedentes;
-6. formato API entre Core y Chain Watcher;
-7. retención de auditoría y datos de wallet;
-8. reglas específicas de rotación/cuarentena de la wallet del desarrollador, coordinadas con TrustChain.
+1. criterio exacto de confirmaciones/finalidad para Polygon PoS;
+2. formato canónico del desafío de firma de wallet;
+3. política operativa para pagos realizados después de la expiración;
+4. política de soporte para pagos duplicados o excedentes;
+5. formato API entre Core y Chain Watcher;
+6. retención de auditoría y datos de wallet;
+7. reglas específicas de rotación/cuarentena de la wallet del desarrollador, coordinadas con TrustChain.
 
 Ninguna de estas decisiones pendientes debe introducir custodia de fondos como atajo.
 
