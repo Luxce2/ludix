@@ -147,15 +147,22 @@ Lo que Ludix sí hace es proveer:
 
 ## 5. El poder de los forks como garantía real
 
-Una de las garantías más importantes que Ludix puede dar no es técnica ni legal. Es arquitectónica.
+Una de las garantías más importantes de Ludix es arquitectónica: **si una instancia traiciona los principios del proyecto, la comunidad puede forkear el código y levantar otra**.
 
-**Si Ludix algún día traiciona sus principios, la comunidad puede forkearlo.**
+Pero para que esa garantía sea real, debemos separar identidad de reputación.
 
-Pero más importante: si alguien forkea Ludix, las firmas criptográficas de los desarrolladores siguen siendo válidas. La reputación construida es portable. Los builds verificados siguen verificados.
+La identidad criptográfica de un desarrollador no debe quedar secuestrada por la instancia original. Las claves públicas, fingerprints, firmas de releases y otros artefactos verificables pueden seguir siendo comprobados por un fork sin necesitar la clave privada del estudio ni una copia de la base original.
 
-Esto significa que ninguna empresa — ni siquiera los creadores originales de Ludix — puede tomar el proyecto "de rehén". La infraestructura pertenece a quien la usa, no a quien la creó.
+A la vez, un fork **no hereda automáticamente la confianza** de otra instancia. Evidencia privada de verificación, señales antifraude, notas internas y reputación pertenecen al contexto de la instancia que las generó y deben mantenerse protegidas salvo que exista una forma explícita y verificable de compartir una atestación.
 
-Eso es open source real, no de marketing.
+Eso evita dos problemas opuestos:
+
+- que Ludix centralice la identidad técnica de los creadores;
+- que un clon pueda copiar una base de datos y fingir que heredó toda su confianza.
+
+En otras palabras: **la identidad puede ser portable; la confianza debe tener procedencia**.
+
+La infraestructura pertenece a la comunidad precisamente porque una instancia puede ser reemplazada sin obligar a los desarrolladores a entregar sus secretos ni permitir que terceros se apropien silenciosamente de su reputación.
 
 ---
 

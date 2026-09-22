@@ -78,7 +78,7 @@ Es un **problema estructural** de cómo funciona el dinero en internet.
 Es un conjunto de piezas que, juntas, forman una infraestructura abierta:
 
 - Un **backend (API)** para gestionar usuarios, desarrolladores, juegos, builds, compras y reputación.
-- Un **listener de blockchain (Chain Watcher)** que observa una o varias redes (ej. Polygon) y detecta pagos en stablecoins hacia las wallets de los desarrolladores.
+- Un **observador de blockchain (Chain Watcher)** que verifica evidencia on-chain de transferencias y sigue su finalidad sin decidir por sí mismo qué usuario compró qué juego.
 - Un **launcher para jugadores** (escritorio; Tauri + React) donde:
   - ves el catálogo,
   - compras juegos,
@@ -242,50 +242,61 @@ A alto nivel, Ludix se compone de los siguientes bloques:
 
 ### 1. Backend – Ludix Core API (`backend/`)
 
-- Implementado en FastAPI (Python) + PostgreSQL (propuesto).
+- Stack propuesto: FastAPI (Python) + PostgreSQL.
 - Responsabilidades:
-  - Autenticación y gestión de usuarios.
-  - Gestión de desarrolladores y su verificación (TrustChain).
-  - Registro de juegos y builds (con hashes de integridad).
-  - Registro de compras y su estado.
-  - API para:
-    - Launcher (jugadores),
-    - Dev Portal (desarrolladores),
-    - Chain Watcher,
-    - Gateways locales.
+  - autenticación y gestión de cuentas;
+  - perfiles de desarrollador y TrustChain;
+  - catálogo, juegos, builds y ofertas;
+  - wallets verificadas y desafíos de prueba de control;
+  - creación de `Payment Intents` inmutables;
+  - correlación entre evidencia on-chain e intents;
+  - confirmación de pagos;
+  - creación y consulta de `Entitlements` para la biblioteca;
+  - auditoría y estados de seguridad.
+- Expone API para:
+  - Launcher;
+  - Dev Portal;
+  - Chain Watcher;
+  - futuros Gateways locales.
 
-### 2. Chain Watcher – Listener de blockchain (`chain-watcher/`)
+El Core decide si la evidencia satisface una compra. No mueve dinero.
 
-- Servicio separado que:
-  - Escucha una o varias redes (ej. Polygon).
-  - Detecta transacciones hacia wallets de desarrolladores.
-  - Filtra por tokens soportados (ej. USDT/USDC/DAI).
-  - Valida:
-    - monto ≥ precio,
-    - destinatario correcto,
-    - confirmaciones suficientes,
-    - no duplicidad.
-  - Notifica al backend vía una API bien definida (ej. `POST /payments/confirm`).
+### 2. Chain Watcher – Observador de blockchain (`chain-watcher/`)
 
-Ludix nunca toca los fondos; solo observa la red y confirma compras.
+- Servicio separado y deliberadamente pequeño.
+- Su trabajo es observar hechos objetivos de la red:
+  - transacción;
+  - evento de transferencia concreto;
+  - contrato del token;
+  - origen y destino;
+  - monto en unidades atómicas;
+  - bloque y confirmaciones;
+  - reorganizaciones cuando corresponda.
+- No decide:
+  - qué usuario compró;
+  - qué juego fue adquirido;
+  - si debe concederse un Entitlement.
+
+El Launcher puede presentar un `tx_hash`, pero ese dato no se confía hasta que el Watcher encuentre evidencia compatible. El Core compara esa evidencia con el `Payment Intent`.
+
+Ludix nunca toca los fondos; el dinero viaja directamente del jugador al desarrollador.
 
 ### 3. Launcher – Cliente para jugadores (`launcher/`)
 
-- Desktop (Tauri + React).
-- Funcionalidades:
-  - Login / registro.
-  - Catálogo de juegos (exploración).
-  - Pantalla de juego con:
-    - descripción,
-    - precio,
-    - métodos de pago soportados.
-  - Generación de instrucciones de pago:
-    - QR / dirección / monto en stablecoin.
-  - Estado de compra (pendiente / confirmado).
-  - Descarga e instalación:
-    - descarga desde URL del dev,
-    - verificación de hash,
-    - gestión de biblioteca.
+- Desktop (Tauri + React, propuesto).
+- Funcionalidades del MVP:
+  - login / registro;
+  - catálogo y ficha de juego;
+  - vinculación y prueba de control de wallet;
+  - creación/recuperación de `Payment Intents`;
+  - presentación clara de red, token, monto, wallet destino y fee de red;
+  - envío del `tx_hash` después de pagar;
+  - estados de compra: esperando transferencia, detectado, confirmando, confirmado;
+  - biblioteca basada en `Entitlements`;
+  - descarga desde el host del desarrollador;
+  - verificación de integridad del build.
+
+La wallet demuestra el pago; la biblioteca pertenece a la cuenta Ludix.
 
 ### 4. Dev Portal – Panel de desarrolladores (`dev-portal/`)
 
@@ -299,16 +310,21 @@ Ludix nunca toca los fondos; solo observa la red y confirma compras.
     - URL de descarga,
     - hash,
     - tamaño estimado.
-  - Configurar precios y monedas aceptadas.
-  - Ver histórico de compras.
+  - Configurar ofertas de pago:
+    - red y token soportado,
+    - precio,
+    - wallet de cobro previamente verificada.
+  - Ver histórico de compras y pagos confirmados.
 
 ### 5. Gateways de pago locales (`gateways/`)
 
 - Complemento opcional.
 - Cada gateway:
-  - se conecta a un sistema de pago local (Pix, UPI, MeliDólar, etc.),
-  - verifica pagos según las reglas locales,
-  - notifica al backend de Ludix exactamente igual que el Chain Watcher on-chain.
+  - se conecta a un sistema de pago local (Pix, UPI, MeliDólar, etc.);
+  - verifica pagos según las reglas locales;
+  - entrega al Core **evidencia de adquisición** mediante una interfaz común, sin fingir que esa evidencia es on-chain.
+
+El Core conserva la misma separación conceptual: un método aporta evidencia verificable y, si satisface su política, puede producir un Entitlement. El contrato exacto de Gateways se definirá en RFC-0006.
 
 Así, el core de Ludix no se contamina con requisitos regulatorios o APIs cerradas de cada país.
 
@@ -338,59 +354,70 @@ Así, el core de Ludix no se contamina con requisitos regulatorios o APIs cerrad
 ### 2. Onboarding de desarrollador
 
 1. Un usuario registrado solicita convertirse en desarrollador.
-2. El sistema le pide:
-   - nombre del estudio,
-   - sitio web oficial,
-   - dominio a verificar,
-   - wallet pública principal,
-   - datos opcionales (redes, GitHub, etc.).
-3. Ludix genera un desafío de verificación (archivo en el dominio, registro DNS, etc.).
-4. El dev lo configura.
-5. Ludix verifica y activa el modo desarrollador en esa cuenta.
-6. De ahí en adelante, ese usuario puede publicar juegos.
+2. Configura su perfil público de estudio.
+3. Registra una **clave pública de identidad**; la clave privada permanece siempre bajo su control.
+4. Demuestra control criptográfico de esa identidad mediante un challenge firmado.
+5. Verifica señales adicionales como:
+   - dominio oficial;
+   - cuentas/plataformas opcionales;
+   - otros mecanismos definidos por TrustChain.
+6. Registra una wallet de cobro y demuestra que la controla mediante firma.
+7. La instancia conserva de forma privada la evidencia sensible y puede emitir una atestación de verificación con procedencia.
+8. A partir de ahí puede publicar juegos y ofertas según las políticas de la instancia.
+
+La identidad criptográfica puede ser verificable fuera de la instancia; la reputación y evidencia privada no se transfieren automáticamente a un fork.
 
 ### 3. Publicación de un juego
 
-1. El dev entra al Dev Portal.
-2. Crea un juego:
-   - título,
-   - descripción,
-   - imágenes,
-   - tags,
+1. El desarrollador entra al Dev Portal.
+2. Crea un juego con sus metadatos:
+   - título;
+   - descripción;
+   - imágenes;
+   - tags;
    - clasificación de contenido.
-3. Define:
-   - precio en alguna stablecoin,
-   - wallet de destino.
-4. Registra un build:
-   - URL de descarga (su servidor, S3, IPFS, etc.),
-   - hash SHA-256 del archivo,
-   - tamaño aproximado.
-5. El backend guarda todo y el juego aparece publicado en el catálogo.
+3. Registra un build:
+   - URL de descarga;
+   - hash SHA-256;
+   - versión/plataforma;
+   - firma del release cuando la política lo requiera.
+4. Crea una **oferta** separada del juego con:
+   - red;
+   - token;
+   - precio en unidades del activo;
+   - wallet de cobro verificada.
+5. El backend publica el juego y su oferta activa.
 
-### 4. Compra on-chain (estable, sin intermediarios financieros)
+Separar juego y oferta permite cambiar condiciones futuras sin reescribir compras ya iniciadas.
 
-1. El jugador abre la ficha del juego en el launcher.
-2. Ve:
-   - precio,
-   - red soportada,
-   - token (ej. USDT),
-   - dirección de wallet del dev (o de un contrato, en el futuro).
-3. El launcher genera una instrucción:
-   - QR,
-   - o dirección + monto exacto.
-4. El jugador paga desde su wallet de stablecoins.
-5. El Chain Watcher:
-   - detecta la transacción,
-   - verifica token, monto, destino, confirmaciones.
-6. Si es válida:
-   - llama al backend (`/payments/confirm`) con:
-     - user_id,
-     - game_id,
-     - tx_hash,
-     - amount,
-     - timestamp.
-7. El backend registra la compra como “confirmada”.
-8. El launcher actualiza el estado y habilita el botón “Descargar”.
+### 4. Compra on-chain — `Payment Intent → Evidence → Entitlement`
+
+El flujo canónico está definido en `specs/rfc-0001-payment-flow.md`.
+
+1. El jugador abre la ficha del juego y pulsa **Comprar**.
+2. Debe usar una wallet cuyo control haya demostrado mediante firma.
+3. El Core crea un **Payment Intent inmutable** que congela:
+   - cuenta;
+   - juego/oferta;
+   - wallet pagadora;
+   - wallet receptora;
+   - red;
+   - contrato exacto del token;
+   - monto;
+   - expiración y política de finalidad.
+4. El launcher muestra esas condiciones y el jugador firma una transferencia directa:
+
+   `wallet jugador → wallet desarrollador`
+
+5. Ludix no recibe fondos, no solicita `approve`, allowance, seed ni permiso para gastar.
+6. El launcher presenta al Core el `tx_hash` realizado.
+7. El Chain Watcher observa la blockchain y entrega evidencia objetiva de la transferencia concreta (`chain_id + tx_hash + evento`).
+8. El Core comprueba que origen, destino, activo, monto, tiempo, no reutilización y finalidad coinciden con el Payment Intent.
+9. Cuando alcanza la finalidad requerida, el pago queda `CONFIRMED`.
+10. El Core crea de forma idempotente un **Entitlement** para la cuenta del jugador.
+11. El juego aparece en su biblioteca aunque después cambie o pierda la wallet usada para pagar.
+
+Si el RPC o el Watcher están temporalmente caídos, el pago queda pendiente de verificación; Ludix no lo declara fallido solo por no poder consultar la red.
 
 ### 5. Descarga e instalación
 
@@ -423,50 +450,43 @@ Así, el core de Ludix no se contamina con requisitos regulatorios o APIs cerrad
 
 ## Ludix TrustChain – Verificación de desarrolladores
 
-Para que no cualquiera se haga pasar por otro estudio, Ludix define **TrustChain**, un sistema por capas para verificar desarrolladores de forma robusta, sin convertir esto en burocracia corporativa.
+TrustChain separa **identidad criptográfica**, **evidencia privada** y **reputación de instancia**.
+
+La documentación detallada está en `docs/es/trustchain.md`.
 
 ### Capas propuestas
 
-1. **Criptografía (identidad técnica)**
-   - Cada dev tiene una clave pública registrada.
-   - Puede firmar hashes de sus builds o metadatos.
-   - Ludix valida firmas con esa clave pública.
-   - Si alguien roba el juego pero no tiene la clave privada del estudio, no puede firmar.
+1. **Identidad criptográfica**
+   - El desarrollador registra una clave pública de firma.
+   - La clave privada nunca entra en Ludix.
+   - Firmas de releases y otros artefactos pueden verificarse fuera de la instancia original.
 
 2. **Verificación de dominio**
-   - El dev demuestra control de su dominio oficial:
-     - subiendo un archivo específico,
-     - o añadiendo un registro DNS.
-   - Ludix verifica automáticamente.
-   - Esto vincula:
-     - cuenta Ludix ↔ dominio ↔ marca.
+   - Control mediante DNS TXT, `/.well-known/...` u otro mecanismo verificable.
+   - El resultado puede convertirse en una atestación pública con procedencia.
 
-3. **Vínculos con cuentas oficiales**
-   - Opcional:
-     - GitHub,
-     - Twitter/X,
-     - Itch.io,
-     - Steam (Steamworks),
-     - etc.
-   - Estos vínculos aumentan la confianza, pero no son obligatorios para todos.
+3. **Vínculos con plataformas externas**
+   - GitHub, Itch.io, Steamworks u otros mecanismos opcionales.
+   - Tokens OAuth y credenciales permanecen privados.
 
-4. **Builds con hashes y (opcionalmente) firmas**
-   - Todo build tiene hash obligatorio.
-   - Puede además firmarse con PGP u otra clave asociada al estudio.
-   - Cualquier alteración salta.
+4. **Integridad de builds**
+   - Hash obligatorio.
+   - Arquitectura preparada para firmas de release ligadas a la identidad del estudio.
 
 5. **Reputación y reportes**
-   - A medida que los jugadores compran y usan los juegos:
-     - se acumula reputación,
-     - se registran reportes.
-   - Devs con buena conducta y cero incidentes ganan confianza.
-   - Devs con muchos reportes por fraude/malware pueden ser limitados o expulsados.
+   - Son contexto de una instancia.
+   - Un fork no hereda reputación o estado `VERIFIED` automáticamente.
 
-6. **Requisitos extra para vender Steam Keys y claves externas**
-   - Para vender Steam Keys (u otras claves externas), se exigirá un nivel de verificación superior:
-     - pruebas de que controla el Steam App ID,
-     - o mecanismos equivalentes.
-   - Esto busca evitar cualquier parecido con mercados grises/ilegales de keys.
+6. **Alta confianza para funciones sensibles**
+   - Por ejemplo, venta de Steam Keys externas puede exigir pruebas adicionales de legitimidad.
+
+### Público vs privado
+
+**Puede ser público/verificable:** clave pública, fingerprint, hashes, firmas, dominio declarado y atestaciones con procedencia.
+
+**Debe permanecer privado:** claves privadas, OAuth secrets, evidencia sensible, señales antifraude, notas internas y otros datos que no necesiten publicarse.
+
+La regla es: **la identidad puede ser portable; la confianza debe tener procedencia**.
 
 ---
 
@@ -479,9 +499,11 @@ La arquitectura de Ludix parte de una premisa:
 En vez de meter Pix, UPI, MeliDólar, etc. dentro del core, Ludix define el concepto de **Ludix Payment Gateways**:
 
 - Pequeños servicios externos que:
-  - hablan con un sistema local (Pix, UPI, Mercado Pago, etc.),
-  - verifican pagos siguiendo reglas locales,
-  - y, una vez confirmados, llaman al backend de Ludix con el mismo formato que el Chain Watcher (`/payments/confirm`).
+  - hablan con un sistema local (Pix, UPI, Mercado Pago, etc.);
+  - verifican pagos siguiendo reglas locales;
+  - producen evidencia con procedencia clara mediante una interfaz definida para Gateways.
+
+Un Gateway **no imita evidencia blockchain**. El Core recibe una clase distinta de evidencia y puede transformarla en un Entitlement bajo las reglas del método correspondiente. Esta abstracción mantiene separado el derecho adquirido del mecanismo concreto de pago.
 
 Ventajas:
 
@@ -577,34 +599,41 @@ Este README y los documentos en `docs/` y `specs/` son parte de esa fase.
 
 ### Fase 0 – Fundamentos (donde estamos)
 
-- README(s).
-- Visión, contexto de censura financiera y motivación.
-- Diseño de arquitectura general.
-- Flujos principales definidos.
-- TrustChain (concepto).
-- Diseño de Gateways locales.
-- Estructura del repositorio.
+- Manifiesto, visión y límites éticos.
+- RFC-0001: flujo de pago no custodial.
+- RFC-0002: modelo de datos derivado del flujo.
+- TrustChain: identidad pública verificable + evidencia sensible privada.
+- Definición de arquitectura y responsabilidades Core / Watcher / Launcher.
+- Cierre de parámetros del MVP: red, stablecoin, finalidad y duración de intents.
+- RFC-0003 / RFC-0004 antes de iniciar implementación.
+- Licencia definitiva antes del primer código funcional.
 
 ### Fase 1 – MVP técnico (línea de base)
 
-- Backend básico:
-  - usuarios,
-  - devs,
-  - juegos,
-  - builds,
-  - compras simples.
+- Backend Core:
+  - cuentas y desarrolladores;
+  - wallets verificadas;
+  - catálogo, builds y ofertas;
+  - Payment Intents;
+  - pagos/evidencia;
+  - Entitlements.
 - Chain Watcher MVP:
-  - 1 red (ej. Polygon),
-  - 1 stablecoin (ej. USDT).
+  - 1 red;
+  - 1 stablecoin;
+  - seguimiento de transferencia concreta, confirmaciones y reorgs.
 - Launcher MVP:
-  - login,
-  - catálogo sencillo,
-  - compra,
-  - descarga.
+  - login;
+  - catálogo;
+  - wallet proof;
+  - compra on-chain;
+  - biblioteca;
+  - descarga y verificación de integridad.
 - Dev Portal MVP:
-  - publicar juegos,
-  - registrar builds,
-  - configurar una wallet.
+  - perfil de estudio;
+  - identidad criptográfica base;
+  - publicar juegos/builds;
+  - verificar y configurar wallet de cobro;
+  - crear una oferta.
 
 ### Fase 2 – TrustChain y reputación
 
@@ -714,11 +743,13 @@ Antes de publicar el primer código funcional del proyecto, se fijará la licenc
 
 ### **¿Puedo usar Ludix para cobrar solo con Pix / MercadoPago / UPI sin usar stablecoins?**
 
-El core de Ludix está diseñado en torno a **pagos directos on-chain con stablecoins**.  
-Los Gateways locales son **opcionales** y complementan esa base.
+El MVP de Ludix parte de **pagos directos on-chain** y, deliberadamente, comenzará con una sola combinación de red + stablecoin para hacer bien el flujo completo antes de multiplicar integraciones.
 
-Puedes montar una instancia más “localizada”,  
-pero la filosofía de Ludix es evitar depender de bancos o pasarelas tradicionales.
+Esa dependencia inicial no es el objetivo final. La arquitectura está preparada para incorporar progresivamente otros activos, redes y Gateways, reduciendo la dependencia de un único emisor, proveedor o intermediario privado.
+
+Los Gateways locales son opcionales y permiten adaptar una instancia a sistemas como Pix, Mercado Pago o UPI sin convertirlos en requisito del core. La filosofía sigue siendo minimizar puntos privados capaces de cortar unilateralmente el acceso económico a contenido legal.
+
+Ludix no busca anonimato absoluto ni ocultar actividad ilegal: respeta procesos legales legítimos. Lo que rechaza es que un privado pueda reemplazar a un juez mediante su control del dinero.
 
 ---
 

@@ -126,15 +126,18 @@ No es para todos. Y está bien.
 
 ---
 
-## El poder de los forks
+## El poder de los forks y la seguridad
 
-Si mañana Ludix se desvía de estos principios, la comunidad puede forkearlo.  
-Las firmas criptográficas de los desarrolladores siguen siendo válidas.  
-Los builds verificados siguen siendo verificados.  
-La reputación construida no desaparece.
+Si mañana Ludix se desvía de estos principios, la comunidad puede forkear el código.
+Pero forkear código no significa copiar ciegamente confianza.
 
-Eso no es una característica técnica.  
-Es la garantía más importante que podemos dar.
+La **identidad criptográfica pertenece al desarrollador**: sus claves públicas y las firmas que produce pueden verificarse fuera de la instancia original. La clave privada nunca pertenece a Ludix.
+
+Al mismo tiempo, la evidencia sensible usada para verificar identidades, las señales antifraude, las notas internas y otros datos privados de producción **no tienen por qué ser públicos ni transferirse a un fork**.
+
+Un fork puede verificar las pruebas criptográficas por sí mismo. Lo que no puede hacer es apropiarse automáticamente de la reputación o de una etiqueta de “verificado” sin demostrar de dónde proviene esa confianza.
+
+El código es libre. La identidad técnica es del creador. Los datos sensibles siguen protegidos. Y la confianza debe poder explicar su procedencia.
 
 ---
 
