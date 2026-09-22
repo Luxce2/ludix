@@ -604,7 +604,8 @@ Este README y los documentos en `docs/` y `specs/` son parte de esa fase.
 - RFC-0002: modelo de datos derivado del flujo.
 - TrustChain: identidad pública verificable + evidencia sensible privada.
 - Definición de arquitectura y responsabilidades Core / Watcher / Launcher.
-- Cierre de parámetros del MVP: red, stablecoin, finalidad y duración de intents.
+- Red y activo del MVP fijados: **Polygon PoS + USDC nativo**.
+- Cierre pendiente de política de finalidad y duración de intents.
 - RFC-0003 / RFC-0004 antes de iniciar implementación.
 - Licencia definitiva antes del primer código funcional.
 
@@ -618,9 +619,9 @@ Este README y los documentos en `docs/` y `specs/` son parte de esa fase.
   - pagos/evidencia;
   - Entitlements.
 - Chain Watcher MVP:
-  - 1 red;
-  - 1 stablecoin;
-  - seguimiento de transferencia concreta, confirmaciones y reorgs.
+  - Polygon PoS (`chain_id = 137`);
+  - USDC nativo de Circle;
+  - seguimiento de transferencia concreta, finalidad y eventos anómalos de red.
 - Launcher MVP:
   - login;
   - catálogo;
@@ -743,7 +744,7 @@ Antes de publicar el primer código funcional del proyecto, se fijará la licenc
 
 ### **¿Puedo usar Ludix para cobrar solo con Pix / MercadoPago / UPI sin usar stablecoins?**
 
-El MVP de Ludix parte de **pagos directos on-chain** y, deliberadamente, comenzará con una sola combinación de red + stablecoin para hacer bien el flujo completo antes de multiplicar integraciones.
+El MVP de Ludix parte de **pagos directos on-chain** y comenzará específicamente con **Polygon PoS + USDC nativo de Circle** para hacer bien el flujo completo antes de multiplicar integraciones.
 
 Esa dependencia inicial no es el objetivo final. La arquitectura está preparada para incorporar progresivamente otros activos, redes y Gateways, reduciendo la dependencia de un único emisor, proveedor o intermediario privado.
 

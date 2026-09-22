@@ -172,10 +172,15 @@ Después de una compra confirmada, cambiar, perder o dejar de usar la wallet pag
 
 ## 6. Alcance del MVP on-chain
 
-La primera implementación debe ser deliberadamente pequeña:
+La primera implementación debe ser deliberadamente pequeña y queda fijada así. **Decisión adoptada: 2026-09-22.**
 
-- **una blockchain compatible definida por configuración**;
-- **un único stablecoin soportado**;
+- **Red:** Polygon PoS mainnet.
+- **Chain ID:** `137`.
+- **Activo de pago:** USDC nativo emitido por Circle.
+- **Contrato USDC nativo:** `0x3c499c542cef5e3811e1192ce70d8cc03d5c3359`.
+- **Decimales:** `6`.
+- **Gas:** POL.
+- **No soportado en el MVP:** USDC.e puenteado u otros tokens que compartan ticker o apariencia similar.
 - transferencia directa del token desde jugador a desarrollador;
 - una transferencia por compra;
 - una wallet pagadora que pueda firmar;
@@ -184,9 +189,9 @@ La primera implementación debe ser deliberadamente pequeña:
 - un Payment Intent por compra activa;
 - un Entitlement por cuenta y juego cuando corresponda.
 
-La elección concreta de red y stablecoin pertenece a la configuración de despliegue del MVP y no debe convertirse en una dependencia arquitectónica permanente.
+La selección Polygon PoS + USDC nativo es una **decisión de alcance para Fase 1**, no una dependencia arquitectónica permanente. Se elige porque permite mantener el primer Chain Watcher dentro del modelo EVM/ERC-20, ofrece una ruta de pagos de bajo costo y finalidad rápida, y evita introducir desde el día uno múltiples modelos de wallet y parsing de transacciones.
 
-Esta restricción es deliberadamente transitoria. El MVP comienza con una sola combinación red/activo para reducir complejidad y poder verificar correctamente el flujo completo. La dirección futura de Ludix es ampliar de forma gradual los activos y redes compatibles, siempre que puedan integrarse sin introducir custodia ni permisos de gasto por parte de Ludix.
+Esta restricción es deliberadamente transitoria. La dirección futura de Ludix es ampliar de forma gradual los activos y redes compatibles, siempre que puedan integrarse sin introducir custodia ni permisos de gasto por parte de Ludix.
 
 El objetivo de esa expansión no es acumular blockchains por cantidad, sino **reducir dependencias concentradas y ofrecer caminos de pago cada vez menos expuestos a la decisión unilateral de un único proveedor, emisor o intermediario privado**.
 
@@ -194,7 +199,9 @@ El objetivo de esa expansión no es acumular blockchains por cantidad, sino **re
 
 ## 7. Identidad del activo y cantidades
 
-Un ticker como `USDT` no identifica de forma suficiente un activo.
+Un ticker como `USDC` no identifica de forma suficiente un activo. Para el MVP, la única combinación válida es la definida por `chain_id = 137` y el contrato nativo de USDC indicado en la sección anterior.
+
+El símbolo mostrado en UI nunca sustituye la validación por red + contrato. En particular, **USDC.e no es válido para el flujo de compra del MVP** aunque una wallet o explorador lo muestre con un nombre parecido.
 
 El Payment Intent debe congelar al menos:
 
@@ -209,7 +216,7 @@ La cantidad canónica nunca debe almacenarse como un decimal financiero genéric
 Ejemplo conceptual:
 
 ```text
-Activo mostrado: 10.00 USDT
+Activo mostrado: 10.00 USDC
 Cantidad canónica: 10000000 unidades atómicas
 Decimales: 6
 ```
@@ -896,16 +903,14 @@ El flujo de pago no debe considerarse listo para implementación hasta que el di
 
 Este RFC fija el modelo conceptual. Los siguientes parámetros todavía deben cerrarse en RFCs posteriores o en una revisión final de Fase 0:
 
-1. red exacta del MVP;
-2. stablecoin exacta del MVP;
-3. duración por defecto de un Payment Intent;
-4. criterio exacto de confirmaciones/finalidad para la red elegida;
-5. formato canónico del desafío de firma de wallet;
-6. política operativa para pagos realizados después de la expiración;
-7. política de soporte para pagos duplicados o excedentes;
-8. formato API entre Core y Chain Watcher;
-9. retención de auditoría y datos de wallet;
-10. reglas específicas de rotación/cuarentena de la wallet del desarrollador, coordinadas con TrustChain.
+1. duración por defecto de un Payment Intent;
+2. criterio exacto de confirmaciones/finalidad para Polygon PoS;
+3. formato canónico del desafío de firma de wallet;
+4. política operativa para pagos realizados después de la expiración;
+5. política de soporte para pagos duplicados o excedentes;
+6. formato API entre Core y Chain Watcher;
+7. retención de auditoría y datos de wallet;
+8. reglas específicas de rotación/cuarentena de la wallet del desarrollador, coordinadas con TrustChain.
 
 Ninguna de estas decisiones pendientes debe introducir custodia de fondos como atajo.
 

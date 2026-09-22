@@ -273,10 +273,10 @@ Campos propuestos para el MVP:
 
 - `id`: UUID, PK.
 - `game_id`: UUID, FK.
-- `chain_id`: NUMERIC/VARCHAR según implementación.
-- `token_contract`: VARCHAR.
-- `token_symbol`: VARCHAR, dato de presentación.
-- `token_decimals`: SMALLINT.
+- `chain_id`: valor `137` para Polygon PoS en Fase 1.
+- `token_contract`: `0x3c499c542cef5e3811e1192ce70d8cc03d5c3359` para USDC nativo en Fase 1.
+- `token_symbol`: `USDC`, dato de presentación.
+- `token_decimals`: `6`.
 - `price_atomic`: NUMERIC(78,0) o representación entera equivalente.
 - `payout_wallet_id`: UUID, FK -> wallets.id.
 - `status`: ENUM (`ACTIVE`, `PAUSED`, `RETIRED`).
@@ -603,18 +603,16 @@ Esto deriva directamente de RFC-0001 y permite añadir otros métodos de adquisi
 
 ## 20. Decisiones pendientes antes de implementación
 
-1. red exacta del MVP;
-2. stablecoin exacta del MVP;
-3. representación final de `chain_id`;
-4. duración de Payment Intent;
-5. política exacta de finalidad;
-6. reglas de ownership/uso compartido de wallets;
-7. formato del Wallet Proof;
-8. política final de firma de builds;
-9. formato de atestaciones TrustChain;
-10. política de retención de evidencia privada y auditoría;
-11. tratamiento exacto de revocaciones de Entitlements;
-12. comportamiento ante pagos tardíos/duplicados que requieran soporte manual.
+1. representación final de `chain_id` en el esquema;
+2. duración de Payment Intent;
+3. política exacta de finalidad para Polygon PoS;
+4. reglas de ownership/uso compartido de wallets;
+5. formato del Wallet Proof;
+6. política final de firma de builds;
+7. formato de atestaciones TrustChain;
+8. política de retención de evidencia privada y auditoría;
+9. tratamiento exacto de revocaciones de Entitlements;
+10. comportamiento ante pagos tardíos/duplicados que requieran soporte manual.
 
 Hasta cerrar estas decisiones y revisar este modelo contra RFC-0003/RFC-0004, el documento permanece en Fase 0.
 
