@@ -325,10 +325,12 @@ Campos mínimos propuestos:
 - `finality_policy_version`: VARCHAR/UUID.
 - `status`: ENUM (`CREATED`, `TX_SUBMITTED`, `CONFIRMING`, `CONFIRMED`, `EXPIRED`, `INVALID`, `CANCELLED`).
 - `created_at`: TIMESTAMPTZ.
-- `expires_at`: TIMESTAMPTZ.
+- `expires_at`: TIMESTAMPTZ; para Fase 1 se crea normalmente como `created_at + 60 minutos`.
 - `confirmed_at`: TIMESTAMPTZ nullable.
 
 Los campos económicos congelados no se actualizan después de crear el intent.
+
+Para Fase 1, la ventana de pago aprobada es de **60 minutos**. La duración posterior durante la cual el sistema intenta reconciliar automáticamente una transferencia ya realizada es una política diferente y todavía pendiente; no debe confundirse con `expires_at`.
 
 ---
 
@@ -617,7 +619,7 @@ Esto deriva directamente de RFC-0001 y permite añadir otros métodos de adquisi
 ## 20. Decisiones pendientes antes de implementación
 
 1. representación final de `chain_id` en el esquema;
-2. duración de Payment Intent;
+2. duración/política de la ventana automática de reconciliación;
 3. política exacta de finalidad para Polygon PoS;
 4. reglas de ownership/uso compartido de wallets;
 5. formato del Wallet Proof;

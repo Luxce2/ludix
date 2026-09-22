@@ -1,6 +1,6 @@
 # RFC-0001: Flujo de Compra y Pago No Custodial
 
-> **Estado:** Fase 0 — Flujo aprobado conceptualmente; Polygon PoS + USDC nativo aprobados para Fase 1; finalidad y duración del intent pendientes.
+> **Estado:** Fase 0 — Flujo aprobado conceptualmente; Polygon PoS + USDC nativo y ventana de pago de 60 minutos aprobados para Fase 1; finalidad y ventana de resolución pendientes.
 > **Ámbito:** MVP on-chain de Ludix.
 > **Objetivo:** definir cómo una transferencia directa entre jugador y desarrollador se convierte, de forma verificable e idempotente, en un derecho de acceso a un juego sin que Ludix custodie fondos ni pueda gastarlos.
 
@@ -450,10 +450,30 @@ La interfaz debe diseñarse para minimizar este caso generando la transferencia 
 
 La expiración protege contra condiciones comerciales indefinidas; no debe convertir una transferencia válida en una pérdida artificial solo porque las confirmaciones tardaron.
 
+### 15.1 Ventana de pago aprobada
+
+Para Fase 1, un Payment Intent tiene una **ventana normal de pago de 60 minutos** desde `created_at`. Por tanto, su `expires_at` normal es:
+
+```text
+expires_at = created_at + 60 minutos
+```
+
+Durante esa hora permanecen congeladas las condiciones del intent: cuenta, juego/oferta, wallet pagadora, wallet receptora, red, contrato del token, monto y política de finalidad.
+
+La hora se elige como margen humano razonable para abrir o configurar la wallet, verificar la red, disponer de POL para gas, revisar monto/destino y completar la transferencia sin mantener indefinidamente una condición comercial antigua.
+
+### 15.2 Ventana de pago != ventana de resolución
+
+La ventana de 60 minutos responde únicamente a **cuándo debe ocurrir la transferencia** para pertenecer al flujo normal de ese intent. No define cuánto tiempo puede tardar Ludix en detectar, verificar o reconciliar una transferencia que ya ocurrió.
+
+La duración de la **ventana automática de resolución/reconciliación** se decidirá por separado. Un fallo del Watcher, RPC, Core o Launcher nunca debe convertir retroactivamente una transferencia incluida a tiempo en un pago fuera de plazo.
+
 Se distinguen dos momentos:
 
 1. **momento de inclusión de la transferencia en la cadena**;
 2. **momento en que Ludix alcanza suficientes confirmaciones para aceptarla**.
+
+### 15.3 Regla temporal de validez
 
 Si la transferencia fue incluida en cadena dentro de la ventana válida del Payment Intent, puede terminar de confirmarse después de `expires_at`.
 
@@ -928,7 +948,7 @@ El flujo de pago no debe considerarse listo para implementación hasta que el di
 
 Este RFC fija el modelo conceptual. Los siguientes parámetros todavía deben cerrarse en RFCs posteriores o en una revisión final de Fase 0:
 
-1. duración por defecto de un Payment Intent;
+1. duración de la ventana automática de resolución/reconciliación después de una transferencia;
 2. criterio exacto de confirmaciones/finalidad para Polygon PoS;
 3. formato canónico del desafío de firma de wallet;
 4. política operativa para pagos realizados después de la expiración;
