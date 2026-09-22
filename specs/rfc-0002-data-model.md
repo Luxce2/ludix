@@ -334,7 +334,9 @@ Los campos económicos congelados no se actualizan después de crear el intent.
 
 Para Fase 1, la ventana de pago aprobada es de **60 minutos** y la ventana automática de resolución/reconciliación es de **72 horas**. No deben confundirse: `expires_at` determina hasta cuándo una nueva transferencia pertenece al flujo normal del intent; la reconciliación determina cuánto tiempo Ludix sigue intentando resolver automáticamente una transferencia potencialmente ya realizada.
 
-Superadas las 72 horas, el caso puede pasar a recuperación sin eliminar la evidencia ni volver inválida una transferencia que objetivamente fue incluida dentro de la ventana de 60 minutos. La recuperación histórica debe seguir siendo posible mientras exista evidencia correlacionable y se respeten las políticas de retención aplicables.
+Superadas las 72 horas, el caso puede pasar a recuperación sin eliminar la evidencia ni volver inválida una transferencia que objetivamente fue válida dentro de la política temporal. La recuperación histórica debe seguir siendo posible mientras exista evidencia correlacionable y se respeten las políticas de retención aplicables.
+
+Fase 1 también aprueba una gracia de inclusión de **15 minutos** cuando `server_received_at <= expires_at`. La misma transacción puede clasificarse `GRACE_INCLUDED` si `included_at <= expires_at + 15 minutos`. Una referencia recibida después de `expires_at` o una inclusión posterior a esa gracia se clasifica `LATE_PAYMENT` para recuperación y no como compra normal automática.
 
 ---
 
@@ -349,12 +351,15 @@ Campos propuestos:
 - `id`: UUID, PK.
 - `payment_intent_id`: UUID, FK.
 - `tx_hash`: VARCHAR.
-- `submitted_at`: TIMESTAMPTZ.
+- `client_action_at`: TIMESTAMPTZ nullable; reportado por el launcher, útil para diagnóstico pero no autoritativo.
+- `server_received_at`: TIMESTAMPTZ; asignado por el Core al recibir la referencia y usado como autoridad para la ventana temporal.
 - `superseded_at`: TIMESTAMPTZ nullable.
 - `status`: ENUM (`SUBMITTED`, `MATCHED`, `REJECTED`, `SUPERSEDED`).
 - `rejection_reason`: VARCHAR/TEXT nullable.
 
 Un usuario puede corregir un hash equivocado sin destruir el intent.
+
+Para la política de gracia, `client_action_at` nunca sustituye a `server_received_at`. El primero describe lo que afirma el cliente; el segundo registra cuándo Ludix recibió realmente la referencia.
 
 ---
 
@@ -379,8 +384,9 @@ Campos propuestos:
 - `tx_status`: ENUM (`SUCCESS`, `FAILED`).
 - `confirmation_count`: INTEGER.
 - `finality_status`: ENUM (`OBSERVED`, `CONFIRMING`, `FINAL`, `REORGED`).
-- `first_observed_at`: TIMESTAMPTZ.
-- `last_observed_at`: TIMESTAMPTZ.
+- `first_seen_at`: TIMESTAMPTZ; primer instante en que el Watcher observa la transacción/evidencia.
+- `included_at`: TIMESTAMPTZ; timestamp asociado al bloque de inclusión, usado como evidencia temporal on-chain.
+- `last_seen_at`: TIMESTAMPTZ.
 
 Restricción fundamental:
 
@@ -406,6 +412,7 @@ Campos propuestos:
 - `status`: ENUM (`PENDING`, `OBSERVED`, `CONFIRMING`, `CONFIRMED`, `REJECTED`).
 - `expected_amount_atomic`: NUMERIC(78,0), snapshot de auditoría.
 - `observed_amount_atomic`: NUMERIC(78,0).
+- `timing_classification`: ENUM (`ON_TIME`, `GRACE_INCLUDED`, `LATE_PAYMENT`) o equivalente derivable/auditable.
 - `rejection_reason`: VARCHAR/TEXT nullable.
 - `created_at`: TIMESTAMPTZ.
 - `confirmed_at`: TIMESTAMPTZ nullable.
@@ -630,7 +637,7 @@ Esto deriva directamente de RFC-0001 y permite añadir otros métodos de adquisi
 6. formato de atestaciones TrustChain;
 7. política de retención de evidencia privada y auditoría;
 8. tratamiento exacto de revocaciones de Entitlements;
-9. comportamiento ante pagos tardíos/duplicados que requieran soporte manual.
+9. criterios exactos de recuperación de `LATE_PAYMENT` y pagos duplicados que requieran soporte manual.
 
 Hasta cerrar estas decisiones y revisar este modelo contra RFC-0003/RFC-0004, el documento permanece en Fase 0.
 

@@ -1,6 +1,6 @@
 # RFC-0001: Flujo de Compra y Pago No Custodial
 
-> **Estado:** Fase 0 — Flujo aprobado conceptualmente; Polygon PoS + USDC nativo, ventana de pago de 60 minutos y reconciliación automática de 72 horas aprobados para Fase 1; finalidad exacta pendiente.
+> **Estado:** Fase 0 — Flujo aprobado conceptualmente; Polygon PoS + USDC nativo, ventana de pago de 60 minutos, gracia de inclusión de 15 minutos y reconciliación automática de 72 horas aprobados para Fase 1; finalidad exacta pendiente.
 > **Ámbito:** MVP on-chain de Ludix.
 > **Objetivo:** definir cómo una transferencia directa entre jugador y desarrollador se convierte, de forma verificable e idempotente, en un derecho de acceso a un juego sin que Ludix custodie fondos ni pueda gastarlos.
 
@@ -349,9 +349,18 @@ Para el MVP, Ludix no intenta ocultar el gas mediante paymasters, meta-transacti
 
 ## 11. Presentación de la transacción
 
-Después de enviar la transferencia, el launcher presenta al Core el `tx_hash` asociado al Payment Intent.
+Después de iniciar la transferencia, el launcher presenta al Core el `tx_hash` asociado al Payment Intent tan pronto como la wallet pueda proporcionarlo.
 
-El `tx_hash` suministrado por el cliente es una **afirmación no confiable** hasta que el Chain Watcher encuentre y verifique evidencia compatible.
+El `tx_hash` suministrado por el cliente es una **afirmación no confiable** hasta que el Chain Watcher encuentre y verifique evidencia compatible. Sin embargo, el instante en que el Core recibe esa referencia sí es un hecho propio del servidor y se utiliza para la política temporal.
+
+Ludix distingue explícitamente cuatro tiempos:
+
+- `client_action_at`: hora que el launcher afirma que el jugador actuó; útil para diagnóstico/UX, pero no es autoridad porque el cliente puede estar modificado o tener el reloj incorrecto;
+- `server_received_at`: hora del servidor cuando el Core recibe la referencia de esa transacción; es la autoridad para determinar si el jugador presentó el pago antes de `expires_at`;
+- `first_seen_at`: primer instante en que el Watcher/RPC logra observar la transacción o su evidencia;
+- `included_at`: instante asociado al bloque que incluye la transacción; es evidencia on-chain de cuándo quedó publicada/incluida en la cadena.
+
+La política nunca debe sustituir `server_received_at` por un timestamp arbitrario enviado por el cliente.
 
 Presentar un hash incorrecto no debe destruir el Payment Intent. Mientras el intento continúe siendo recuperable, el usuario puede corregir la referencia presentada.
 
@@ -412,7 +421,7 @@ El Core debe comprobar, como mínimo:
 9. que la transacción subyacente tuvo éxito;
 10. que se alcanzó la política de confirmaciones/finalidad requerida;
 11. que la evidencia no quedó invalidada por una reorganización antes de alcanzar finalidad;
-12. que las reglas temporales del intento se cumplen.
+12. que las reglas temporales del intento se cumplen usando `server_received_at` y la evidencia de inclusión, no únicamente el reloj declarado por el launcher.
 
 El launcher nunca es autoridad sobre estos hechos.
 
@@ -477,19 +486,36 @@ Se distinguen dos momentos:
 1. **momento de inclusión de la transferencia en la cadena**;
 2. **momento en que Ludix alcanza suficientes confirmaciones para aceptarla**.
 
-### 15.3 Regla temporal de validez
+### 15.3 Regla temporal de validez y gracia de inclusión
 
-Si la transferencia fue incluida en cadena dentro de la ventana válida del Payment Intent, puede terminar de confirmarse después de `expires_at`.
+La regla normal es simple: si la transferencia fue incluida en cadena dentro de la ventana válida del Payment Intent, puede terminar de confirmarse después de `expires_at`.
 
-La evidencia histórica de una transferencia válida **no caduca conceptualmente por superar las 72 horas de reconciliación automática**. Mientras Ludix conserve los datos necesarios para correlacionarla de forma inequívoca y la blockchain permita verificarla, una transferencia incluida dentro de los 60 minutos puede ser recuperada posteriormente y producir el Entitlement correspondiente.
+Además, Fase 1 aprueba una **gracia de inclusión de 15 minutos** para una transacción cuya referencia fue presentada a Ludix antes de la expiración. Para que esa gracia aplique deben cumplirse simultáneamente:
+
+```text
+server_received_at <= expires_at
+included_at <= expires_at + 15 minutos
+```
+
+Esta gracia **no extiende la oferta ni permite iniciar un pago nuevo durante 15 minutos adicionales**. Su único propósito es no castigar al jugador cuando actuó y presentó la transacción a tiempo pero la red tardó en incluir exactamente esa misma transacción.
+
+El tiempo declarado por el launcher (`client_action_at`) no basta para activar la gracia. La referencia debe haber llegado realmente al Core antes de `expires_at`.
+
+Una transacción presentada al Core después de `expires_at`, o incluida más allá de la gracia aplicable, se clasifica como `LATE_PAYMENT` para la política de recuperación y no concede el Entitlement automáticamente por la ruta normal.
+
+La evidencia histórica de una transferencia válida **no caduca conceptualmente por superar las 72 horas de reconciliación automática**. Mientras Ludix conserve los datos necesarios para correlacionarla de forma inequívoca y la blockchain permita verificarla, una transferencia válida según la ventana normal o la gracia de inclusión puede ser recuperada posteriormente y producir el Entitlement correspondiente.
 
 La ventana de 72 horas controla el esfuerzo automático de reconciliación; no redefine retrospectivamente la validez económica del pago.
 
-Si el intent expira sin evidencia de una transferencia incluida a tiempo, deja de aceptar pagos nuevos bajo esas condiciones.
+Si el intent expira sin una transferencia válida o sin una presentación a tiempo que luego satisfaga la gracia de inclusión, deja de aceptar pagos nuevos bajo esas condiciones.
 
-Una transferencia enviada después de la expiración no concede automáticamente el Entitlement aunque casualmente tenga el mismo monto y destino. Debe tratarse como un caso de recuperación/manual claramente registrado, no como una coincidencia silenciosa.
+### 15.4 `LATE_PAYMENT`
 
-### 15.4 Estados de resolución prolongada
+`LATE_PAYMENT` significa que Ludix observó dinero real transferido bajo una referencia temporal ya expirada. **No significa que los fondos no existan, ni que Ludix pueda devolverlos.**
+
+Para Fase 1, un `LATE_PAYMENT` debe conservarse y pasar a la política de recuperación. La expiración protege las condiciones de la oferta; no existe para apropiarse del error de un comprador. Los criterios exactos de recuperación automática/manual después de esta clasificación se cierran por separado.
+
+### 15.5 Estados de resolución prolongada
 
 La implementación puede refinar los nombres, pero debe distinguir semánticamente al menos:
 
@@ -554,7 +580,8 @@ CONFIRMED
 Estados alternativos:
 
 ```text
-EXPIRED       -> no apareció una transferencia válida dentro de la ventana
+EXPIRED       -> no apareció una transferencia válida dentro de la ventana ni de una gracia aplicable
+LATE_PAYMENT  -> existe transferencia real, pero quedó fuera de la ventana/gracia normal y requiere política de recuperación
 INVALID       -> la evidencia presentada no satisface las condiciones
 CANCELLED     -> cancelación permitida antes de que exista pago observado
 ```
@@ -958,6 +985,9 @@ El flujo de pago no debe considerarse listo para implementación hasta que el di
 - [ ] un pago inferior no concede el juego;
 - [ ] un pago superior puede concederlo sin crear saldo interno;
 - [ ] un pago incluido a tiempo puede terminar de confirmar después de la expiración del intent;
+- [ ] una tx presentada al Core antes de `expires_at` dispone de hasta 15 minutos adicionales para ser incluida sin extender la oferta;
+- [ ] el timestamp declarado por el launcher no sustituye `server_received_at` como autoridad temporal;
+- [ ] una transferencia fuera de la ventana/gracia se conserva como `LATE_PAYMENT` y no se finge inexistente;
 - [ ] el sistema espera finalidad antes de conceder el Entitlement;
 - [ ] el Entitlement pertenece a la cuenta y no a la wallet;
 - [ ] el launcher puede recuperar una compra pendiente después de reiniciarse;
@@ -972,7 +1002,7 @@ Este RFC fija el modelo conceptual. Los siguientes parámetros todavía deben ce
 
 1. criterio exacto de confirmaciones/finalidad para Polygon PoS;
 2. formato canónico del desafío de firma de wallet;
-3. política operativa para pagos realizados después de la expiración;
+3. criterios exactos de recuperación automática/manual para `LATE_PAYMENT` después de la ventana/gracia;
 4. política de soporte para pagos duplicados o excedentes;
 5. formato API entre Core y Chain Watcher;
 6. retención de auditoría y datos de wallet;
