@@ -608,7 +608,7 @@ Este README y los documentos en `docs/` y `specs/` son parte de esa fase.
 - Estrategia arquitectónica aprobada: **A para implementar, D para diseñar** — un solo rail en Fase 1, Core agnóstico y dependencias reemplazables.
 - Ventanas aprobadas: **60 minutos para presentar el pago + 15 minutos de gracia de inclusión para una tx presentada a tiempo + 72 horas de reconciliación automática**; la gracia no extiende la oferta y la evidencia válida puede recuperarse históricamente después.
 - Política de pago tardío aprobada: recuperar automáticamente cuando las condiciones actuales siguen siendo compatibles; precio superior, oferta retirada, cambio de wallet o alertas de seguridad pasan a revisión.
-- Política exacta de finalidad aún pendiente.
+- Finalidad Polygon aprobada: **detectar rápido, esperar finalidad de red versionada y reverificar la evidencia con una segunda fuente RPC independiente antes de conceder el Entitlement**; discrepancias permanecen en confirmación, no fallan automáticamente.
 - RFC-0003 / RFC-0004 antes de iniciar implementación.
 - Licencia definitiva antes del primer código funcional.
 

@@ -384,6 +384,11 @@ Campos propuestos:
 - `tx_status`: ENUM (`SUCCESS`, `FAILED`).
 - `confirmation_count`: INTEGER.
 - `finality_status`: ENUM (`OBSERVED`, `CONFIRMING`, `FINAL`, `REORGED`).
+- `finality_policy_version`: VARCHAR; `polygon-finality-v1` para el rail inicial.
+- `primary_source_id`: referencia/config ID auditable de la fuente RPC primaria, sin convertir un proveedor concreto en requisito del dominio.
+- `independent_source_id`: referencia/config ID auditable de la segunda fuente usada para reverificación.
+- `independent_verified_at`: TIMESTAMPTZ nullable.
+- `finalized_at`: TIMESTAMPTZ nullable; instante en que la evidencia cumplió finalidad + reverificación requerida.
 - `first_seen_at`: TIMESTAMPTZ; primer instante en que el Watcher observa la transacción/evidencia.
 - `included_at`: TIMESTAMPTZ; timestamp asociado al bloque de inclusión, usado como evidencia temporal on-chain.
 - `last_seen_at`: TIMESTAMPTZ.
@@ -395,6 +400,8 @@ UNIQUE(chain_id, tx_hash, log_index)
 ```
 
 La identidad exacta puede variar fuera de EVM, pero el concepto debe conservarse.
+
+Para Polygon Fase 1, `FINAL` requiere tanto el criterio de red de `polygon-finality-v1` como una reverificación de la misma evidencia mediante una segunda fuente RPC independiente. Una discrepancia entre fuentes no vuelve falso el pago: mantiene la evidencia en `CONFIRMING`/`UNRESOLVED` hasta poder resolverla.
 
 ---
 
@@ -654,14 +661,13 @@ Esto deriva directamente de RFC-0001 y permite añadir otros métodos de adquisi
 ## 20. Decisiones pendientes antes de implementación
 
 1. representación final de `chain_id` en el esquema;
-2. política exacta de finalidad para Polygon PoS;
-3. reglas de ownership/uso compartido de wallets;
-4. formato del Wallet Proof;
-5. política final de firma de builds;
-6. formato de atestaciones TrustChain;
-7. política de retención de evidencia privada y auditoría;
-8. tratamiento exacto de revocaciones de Entitlements;
-9. mecanismo/API exacto de revisión manual de `LATE_PAYMENT` y tratamiento de pagos duplicados.
+2. reglas de ownership/uso compartido de wallets;
+3. formato del Wallet Proof;
+4. política final de firma de builds;
+5. formato de atestaciones TrustChain;
+6. política de retención de evidencia privada y auditoría;
+7. tratamiento exacto de revocaciones de Entitlements;
+8. mecanismo/API exacto de revisión manual de `LATE_PAYMENT` y tratamiento de pagos duplicados.
 
 Hasta cerrar estas decisiones y revisar este modelo contra RFC-0003/RFC-0004, el documento permanece en Fase 0.
 

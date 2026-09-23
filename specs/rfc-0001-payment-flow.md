@@ -1,6 +1,6 @@
 # RFC-0001: Flujo de Compra y Pago No Custodial
 
-> **Estado:** Fase 0 — Flujo aprobado conceptualmente; Polygon PoS + USDC nativo, ventana de pago de 60 minutos, gracia de inclusión de 15 minutos y reconciliación automática de 72 horas aprobados para Fase 1; finalidad exacta pendiente.
+> **Estado:** Fase 0 — Flujo aprobado conceptualmente; Polygon PoS + USDC nativo, ventanas temporales, recuperación tardía y política de finalidad Polygon aprobados para Fase 1; Wallet Proof y APIs técnicas pendientes.
 > **Ámbito:** MVP on-chain de Ludix.
 > **Objetivo:** definir cómo una transferencia directa entre jugador y desarrollador se convierte, de forma verificable e idempotente, en un derecho de acceso a un juego sin que Ludix custodie fondos ni pueda gastarlos.
 
@@ -573,23 +573,49 @@ RECOVERY_REQUIRED   -> terminó la reconciliación automática; puede requerir r
 
 ## 16. Política de confirmaciones y reorganizaciones
 
-Una transferencia observada no se considera inmediatamente definitiva.
+Una transferencia observada no se considera inmediatamente definitiva. Fase 1 adopta una política explícita de **detección rápida + finalidad de red + reverificación independiente**.
 
 El flujo distingue entre:
 
-- transferencia encontrada;
-- transferencia confirmándose;
-- transferencia con finalidad suficiente.
+- `OBSERVED`: el Watcher encontró una transferencia compatible; la UI puede mostrar **Pago detectado**;
+- `CONFIRMING`: la evidencia existe, pero todavía se espera el criterio de finalidad o una comprobación adicional;
+- `FINAL`: la red alcanzó la finalidad exigida por la política versionada y la evidencia fue reverificada mediante infraestructura independiente; recién entonces el Core puede confirmar el pago y crear el Entitlement.
 
-La cantidad exacta de confirmaciones o criterio de finalidad debe ser configurable para la red elegida y formar parte de la política congelada o versionada que aplica al Payment Intent.
+### 16.1 Política Polygon Fase 1: `polygon-finality-v1`
 
-### 16.1 Reorg antes de finalidad
+La política inicial para Polygon PoS **no se define como "esperar N bloques para siempre"**. Debe seguir el mecanismo de finalidad vigente de la red mediante una política versionada, de modo que una futura evolución de Polygon pueda producir `polygon-finality-v2` sin reinterpretar compras históricas.
 
-Si una reorganización elimina o modifica la evidencia antes de alcanzar la finalidad requerida, el pago vuelve a un estado no confirmado y el Core no debe crear el Entitlement.
+Para `polygon-finality-v1`, Ludix debe:
 
-Una indisponibilidad del RPC o del Watcher **no equivale a un pago fallido**. Equivale a evidencia aún no verificable.
+1. detectar la transferencia y validar red, contrato USDC nativo, payer, receiver, monto, estado de la transacción y evento concreto;
+2. marcar la evidencia `OBSERVED` sin crear todavía el Entitlement;
+3. esperar hasta que el bloque/transacción satisfaga el criterio de finalidad reconocido por la política vigente de Polygon;
+4. volver a consultar la misma evidencia mediante una **segunda fuente RPC operacionalmente independiente** de la primera;
+5. exigir consistencia, como mínimo, en `chain_id`, `tx_hash`, `block_hash`, éxito de la transacción, contrato, `log_index`, payer, receiver y cantidad;
+6. marcar la evidencia `FINAL` solo cuando la finalidad de red y la reverificación independiente sean satisfactorias;
+7. entregar al Core únicamente evidencia `FINAL` como suficiente para crear un Entitlement normal.
 
-### 16.2 Evento extremo después de finalidad
+La segunda fuente no hace a Polygon "más final". Su propósito es reducir el riesgo de que Ludix confíe ciegamente en un único RPC desactualizado, defectuoso, censurado o mal configurado.
+
+Los endpoints/proveedores RPC son configuración reemplazable. Ningún proveedor comercial debe convertirse en dependencia arquitectónica obligatoria; una instancia puede combinar proveedores diferentes y, a futuro, nodos propios.
+
+En condiciones normales esta política debe sentirse como una confirmación de pocos segundos, no de minutos. El tiempo de UX es una consecuencia de la red y de la infraestructura, **no un timeout mágico que fuerce aprobación**.
+
+### 16.2 Discrepancia o indisponibilidad de infraestructura
+
+Si la fuente primaria y la fuente independiente no coinciden, o una de ellas no puede verificar la evidencia, el resultado es:
+
+```text
+CONFIRMING / UNRESOLVED
+```
+
+no `FAILED`.
+
+Ludix debe seguir reintentando conforme a la ventana de reconciliación aprobada. La incapacidad de un RPC para confirmar un hecho no demuestra que el pago no ocurrió.
+
+Si una reorganización, inconsistencia de bloque u otra anomalía elimina o modifica la evidencia **antes** de alcanzar `FINAL`, el Core no debe crear el Entitlement y debe continuar/reabrir la verificación según corresponda.
+
+### 16.3 Evento extremo después de finalidad
 
 Una vez que Ludix declaró el pago final y creó el Entitlement conforme a su política documentada, el sistema no debe revocar automáticamente el juego por una reorganización extraordinaria posterior.
 
@@ -1034,7 +1060,9 @@ El flujo de pago no debe considerarse listo para implementación hasta que el di
 - [ ] una transferencia fuera de la ventana/gracia se conserva como `LATE_PAYMENT` y no se finge inexistente;
 - [ ] un `LATE_PAYMENT` compatible con precio/oferta/wallet/seguridad actuales puede recuperarse automáticamente;
 - [ ] una subida de precio, oferta retirada, rotación de wallet o alerta de seguridad impide recuperación automática y fuerza revisión;
-- [ ] el sistema espera finalidad antes de conceder el Entitlement;
+- [ ] el sistema espera la política versionada de finalidad de Polygon antes de conceder el Entitlement;
+- [ ] una segunda fuente RPC independiente reverifica la evidencia antes de `FINAL`;
+- [ ] una discrepancia RPC mantiene `CONFIRMING/UNRESOLVED` y nunca se convierte automáticamente en `FAILED`;
 - [ ] el Entitlement pertenece a la cuenta y no a la wallet;
 - [ ] el launcher puede recuperar una compra pendiente después de reiniciarse;
 - [ ] el modelo de datos conserva evidencia suficiente para auditoría;
@@ -1046,13 +1074,12 @@ El flujo de pago no debe considerarse listo para implementación hasta que el di
 
 Este RFC fija el modelo conceptual. Los siguientes parámetros todavía deben cerrarse en RFCs posteriores o en una revisión final de Fase 0:
 
-1. criterio exacto de confirmaciones/finalidad para Polygon PoS;
-2. formato canónico del desafío de firma de wallet;
-3. mecanismo/API exacto para aprobaciones manuales de recuperación que ya requieren revisión;
-4. política de soporte para pagos duplicados o excedentes;
-5. formato API entre Core y Chain Watcher;
-6. retención de auditoría y datos de wallet;
-7. reglas específicas de rotación/cuarentena de la wallet del desarrollador, coordinadas con TrustChain.
+1. formato canónico del desafío de firma de wallet;
+2. mecanismo/API exacto para aprobaciones manuales de recuperación que ya requieren revisión;
+3. política de soporte para pagos duplicados o excedentes;
+4. formato API entre Core y Chain Watcher;
+5. retención de auditoría y datos de wallet;
+6. reglas específicas de rotación/cuarentena de la wallet del desarrollador, coordinadas con TrustChain.
 
 Ninguna de estas decisiones pendientes debe introducir custodia de fondos como atajo.
 
