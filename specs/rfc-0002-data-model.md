@@ -413,6 +413,8 @@ Campos propuestos:
 - `expected_amount_atomic`: NUMERIC(78,0), snapshot de auditoría.
 - `observed_amount_atomic`: NUMERIC(78,0).
 - `timing_classification`: ENUM (`ON_TIME`, `GRACE_INCLUDED`, `LATE_PAYMENT`) o equivalente derivable/auditable.
+- `recovery_status`: ENUM nullable (`NOT_REQUIRED`, `AUTO_ELIGIBLE`, `REVIEW_REQUIRED`, `RECOVERED`, `NOT_RECOVERED`) o equivalente; no sustituye el estado financiero/evidencial del pago.
+- `recovery_reason`: VARCHAR/TEXT nullable; explica por qué se recuperó automáticamente, requiere revisión o no se recuperó.
 - `rejection_reason`: VARCHAR/TEXT nullable.
 - `created_at`: TIMESTAMPTZ.
 - `confirmed_at`: TIMESTAMPTZ nullable.
@@ -425,6 +427,28 @@ Reglas de integridad:
 - los reintentos deben converger en un solo estado final.
 
 Estas garantías deben reforzarse con índices/restricciones transaccionales, no solo con `if` en la aplicación.
+
+### 10.2 Recuperación de `LATE_PAYMENT`
+
+La recuperación es una evaluación separada de la existencia del pago. Para automatizarla, el Core debe poder comparar el snapshot del intent con el estado comercial y de seguridad actual.
+
+Conceptualmente:
+
+```text
+LATE_PAYMENT
+  + evidencia única y válida
+  + juego todavía adquirible
+  + sin incidentes de seguridad
+  + receiver todavía compatible
+  + observed_amount_atomic >= precio actual compatible
+  + sin Entitlement previo
+        ↓
+AUTO_ELIGIBLE -> RECOVERED -> Entitlement
+```
+
+Si el precio actual subió, la oferta fue retirada, cambió la wallet de cobro o existe una alerta de seguridad, el caso pasa a `REVIEW_REQUIRED`. Una nueva versión/build del mismo juego no es por sí sola causa de revisión cuando el Entitlement representa el juego.
+
+La recuperación manual debe quedar auditada y no puede ignorar cuarentenas o bloqueos de seguridad vigentes.
 
 ---
 
@@ -637,7 +661,7 @@ Esto deriva directamente de RFC-0001 y permite añadir otros métodos de adquisi
 6. formato de atestaciones TrustChain;
 7. política de retención de evidencia privada y auditoría;
 8. tratamiento exacto de revocaciones de Entitlements;
-9. criterios exactos de recuperación de `LATE_PAYMENT` y pagos duplicados que requieran soporte manual.
+9. mecanismo/API exacto de revisión manual de `LATE_PAYMENT` y tratamiento de pagos duplicados.
 
 Hasta cerrar estas decisiones y revisar este modelo contra RFC-0003/RFC-0004, el documento permanece en Fase 0.
 

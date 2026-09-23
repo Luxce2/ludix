@@ -513,7 +513,49 @@ Si el intent expira sin una transferencia válida o sin una presentación a tiem
 
 `LATE_PAYMENT` significa que Ludix observó dinero real transferido bajo una referencia temporal ya expirada. **No significa que los fondos no existan, ni que Ludix pueda devolverlos.**
 
-Para Fase 1, un `LATE_PAYMENT` debe conservarse y pasar a la política de recuperación. La expiración protege las condiciones de la oferta; no existe para apropiarse del error de un comprador. Los criterios exactos de recuperación automática/manual después de esta clasificación se cierran por separado.
+Para Fase 1, un `LATE_PAYMENT` debe conservarse y evaluarse mediante una política de recuperación. La expiración protege las condiciones de la oferta; no existe para apropiarse del error de un comprador.
+
+Principio aprobado:
+
+> **Si Ludix todavía puede cumplir de forma segura las condiciones sustanciales de la compra sin perjudicar al desarrollador, el pago tardío debe recuperarse automáticamente. Si las condiciones comerciales, operativas o de seguridad ya no son compatibles, debe pasar a revisión y nunca fingirse inexistente.**
+
+#### 15.4.1 Recuperación automática
+
+Un `LATE_PAYMENT` puede producir automáticamente el Entitlement cuando, como mínimo:
+
+- la evidencia corresponde inequívocamente al intent original y no fue consumida antes;
+- payer, receiver, red, contrato y demás condiciones criptográficas del pago original son correctos;
+- el jugador todavía no posee un Entitlement equivalente;
+- el juego continúa siendo adquirible y no existe una suspensión o incidente de seguridad;
+- la wallet receptora congelada en el intent continúa siendo una ruta de cobro compatible y no está marcada como comprometida, revocada o en cuarentena;
+- el monto efectivamente recibido cubre el **precio actual** de la oferta compatible.
+
+Esto produce los casos normales siguientes:
+
+- si el precio actual es igual al del intent y el resto sigue compatible, **recuperación automática**;
+- si el precio actual bajó y el monto recibido sigue cubriéndolo, **recuperación automática**, registrando el excedente sin crear saldo interno ni devolución automática;
+- una nueva versión/build del mismo juego no impide la recuperación cuando el Entitlement representa el derecho al juego y no a un build histórico concreto.
+
+#### 15.4.2 Revisión requerida
+
+El `LATE_PAYMENT` no se recupera automáticamente cuando exista al menos una de estas condiciones:
+
+- el precio actual es superior al monto recibido;
+- la oferta fue retirada, pausada o dejó de ser adquirible;
+- la wallet de cobro actual es distinta de la congelada en el intent, incluso cuando la rotación parezca rutinaria;
+- existe una alerta de fraude, seguridad, TrustChain o integridad del juego/build;
+- la wallet receptora original está comprometida, revocada o en cuarentena;
+- cualquier otra condición hace que la compra actual ya no sea sustancialmente equivalente a la intención original.
+
+Una subida de precio no autoriza a reutilizar automáticamente una quote vencida. Si no existe bloqueo de seguridad, el desarrollador puede aceptar excepcionalmente la recuperación bajo el precio anterior mediante un flujo auditable; el Core sigue siendo quien crea el Entitlement después de esa aprobación.
+
+Una oferta retirada o una wallet rotada requieren revisión porque la razón del cambio puede ser comercial o puede representar un incidente. Una alerta de seguridad **siempre impide recuperación automática** hasta que el incidente sea resuelto.
+
+Ludix debe comunicar con claridad que rechazar o pausar la recuperación no equivale a devolver fondos: el dinero ya fue transferido directamente al desarrollador y Ludix nunca lo custodió.
+
+Regla de producto:
+
+> **La expiración protege una oferta; la recuperación protege a una persona que ya entregó dinero.**
 
 ### 15.5 Estados de resolución prolongada
 
@@ -914,6 +956,8 @@ Casos excepcionales deben ser igualmente explícitos:
 - "La intención de compra expiró" cuando no hubo transferencia válida a tiempo.
 - "Seguimos intentando verificar tu pago" durante la ventana automática de reconciliación.
 - "No pudimos resolverlo automáticamente; puedes volver a comprobar este pago" cuando pase a recuperación sin evidencia concluyente.
+- "Recibimos un pago fuera de plazo y estamos comprobando si puede recuperarse" para `LATE_PAYMENT`.
+- "Tu pago tardío fue recuperado y el juego se añadió a tu biblioteca" cuando las condiciones actuales permitan recuperación automática.
 - "Esta transferencia ya fue utilizada" ante un intento de replay.
 
 La interfaz nunca debe insinuar que Ludix puede devolver automáticamente fondos que nunca custodió.
@@ -988,6 +1032,8 @@ El flujo de pago no debe considerarse listo para implementación hasta que el di
 - [ ] una tx presentada al Core antes de `expires_at` dispone de hasta 15 minutos adicionales para ser incluida sin extender la oferta;
 - [ ] el timestamp declarado por el launcher no sustituye `server_received_at` como autoridad temporal;
 - [ ] una transferencia fuera de la ventana/gracia se conserva como `LATE_PAYMENT` y no se finge inexistente;
+- [ ] un `LATE_PAYMENT` compatible con precio/oferta/wallet/seguridad actuales puede recuperarse automáticamente;
+- [ ] una subida de precio, oferta retirada, rotación de wallet o alerta de seguridad impide recuperación automática y fuerza revisión;
 - [ ] el sistema espera finalidad antes de conceder el Entitlement;
 - [ ] el Entitlement pertenece a la cuenta y no a la wallet;
 - [ ] el launcher puede recuperar una compra pendiente después de reiniciarse;
@@ -1002,7 +1048,7 @@ Este RFC fija el modelo conceptual. Los siguientes parámetros todavía deben ce
 
 1. criterio exacto de confirmaciones/finalidad para Polygon PoS;
 2. formato canónico del desafío de firma de wallet;
-3. criterios exactos de recuperación automática/manual para `LATE_PAYMENT` después de la ventana/gracia;
+3. mecanismo/API exacto para aprobaciones manuales de recuperación que ya requieren revisión;
 4. política de soporte para pagos duplicados o excedentes;
 5. formato API entre Core y Chain Watcher;
 6. retención de auditoría y datos de wallet;
